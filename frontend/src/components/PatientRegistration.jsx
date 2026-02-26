@@ -81,14 +81,22 @@ export default function PatientRegistration() {
           </div>
 
           {success && (
-            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
+            <div
+              className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 flex items-center gap-2"
+              role="alert"
+              aria-live="polite"
+            >
               <CheckCircle size={20} />
               Patient registered successfully!
             </div>
           )}
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+            <div
+              className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6"
+              role="alert"
+              aria-live="polite"
+            >
               {error}
             </div>
           )}

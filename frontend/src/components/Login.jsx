@@ -30,6 +30,8 @@ export default function Login() {
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
+      // Clear sensitive password field on failed login attempt
+      setCredentials((prev) => ({ ...prev, password: '' }));
     } finally {
       setLoading(false);
     }

@@ -9,8 +9,16 @@ export default function ClinicianDashboard() {
   const [activeTab, setActiveTab] = useState('waiting');
 
   useEffect(() => {
-    fetchPatients();
-    const interval = setInterval(fetchPatients, 30000); // Refresh every 30 seconds
+    const runFetchPatients = async () => {
+      try {
+        await fetchPatients();
+      } catch (error) {
+        console.error('Error in scheduled fetchPatients:', error);
+      }
+    };
+
+    runFetchPatients();
+    const interval = setInterval(runFetchPatients, 30000); // Refresh every 30 seconds
     return () => clearInterval(interval);
   }, []);
 

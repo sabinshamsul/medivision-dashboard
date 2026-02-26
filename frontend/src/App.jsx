@@ -15,7 +15,20 @@ function App() {
       return <Navigate to="/" />;
     }
 
-    const user = JSON.parse(localStorage.getItem('user'));
+    let user;
+    try {
+      const storedUser = localStorage.getItem('user');
+      if (!storedUser) {
+        return <Navigate to="/" />;
+      }
+      user = JSON.parse(storedUser);
+    } catch (e) {
+      return <Navigate to="/" />;
+    }
+
+    if (!user || !user.role) {
+      return <Navigate to="/" />;
+    }
     if (allowedRoles && !allowedRoles.includes(user.role)) {
       return <Navigate to="/" />;
     }

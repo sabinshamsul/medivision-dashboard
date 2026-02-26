@@ -46,7 +46,25 @@ export default function ClinicianDashboard() {
   };
 
   const handleAssignDoctor = async (patientId) => {
-    const user = JSON.parse(localStorage.getItem('user'));
+    const storedUser = localStorage.getItem('user');
+    if (!storedUser) {
+      console.error('No user information found in localStorage.');
+      return;
+    }
+
+    let user;
+    try {
+      user = JSON.parse(storedUser);
+    } catch (parseError) {
+      console.error('Failed to parse user information from localStorage:', parseError);
+      return;
+    }
+
+    if (!user || typeof user.name !== 'string' || user.name.trim() === '') {
+      console.error('Invalid user information in localStorage: missing or invalid "name" property.');
+      return;
+    }
+
     try {
       await updatePatient(patientId, { 
         assignedDoctor: user.name,

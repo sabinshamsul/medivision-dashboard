@@ -126,7 +126,17 @@ export default function ClinicianDashboard() {
               <div>
                 <h1 className="text-2xl font-bold text-gray-800">Clinician Dashboard</h1>
                 <p className="text-sm text-gray-600">
-                  Dr. {JSON.parse(localStorage.getItem('user')).name}
+                  Dr. {(() => {
+                    const storedUser = localStorage.getItem('user');
+                    if (!storedUser) return '';
+                    try {
+                      const parsedUser = JSON.parse(storedUser);
+                      return parsedUser && parsedUser.name ? parsedUser.name : '';
+                    } catch (e) {
+                      console.error('Failed to parse user from localStorage:', e);
+                      return '';
+                    }
+                  })()}
                 </p>
               </div>
             </div>

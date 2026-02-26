@@ -16,11 +16,16 @@ export default function Login() {
 
     try {
       const response = await login(credentials);
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      const { token, user } = response.data;
+      const safeUser = {
+        username: user.username,
+        role: user.role,
+      };
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(safeUser));
 
       // Redirect based on role
-      const role = response.data.user.role;
+      const role = user.role;
       if (role === 'admin') {
         navigate('/admin');
       } else if (role === 'clinician') {

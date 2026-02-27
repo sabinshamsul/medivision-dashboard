@@ -96,15 +96,6 @@ export default function Login() {
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
-
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-          <p className="text-sm text-gray-600 font-semibold mb-2">Demo Accounts:</p>
-          <div className="space-y-1 text-xs text-gray-600">
-            <p>👤 Admin: admin / admin123</p>
-            <p>👨‍⚕️ Clinician: doctor / doctor123</p>
-            <p>🏥 Patient: patient / patient123</p>
-          </div>
-        </div>
       </div>
     </div>
   );

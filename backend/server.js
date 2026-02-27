@@ -22,6 +22,23 @@ const authRouter = require('./routes/auth');
 app.use('/api/patients', patientsRouter);
 app.use('/api/auth', authRouter);
 
+// Temporary seed route - remove after seeding
+app.get('/api/seed', async (req, res) => {
+  const bcrypt = require('bcryptjs');
+  const User = require('./models/User');
+  try {
+    await User.deleteMany({});
+    await User.insertMany([
+      { username: 'admin', password: await bcrypt.hash('admin123', 10), role: 'admin', name: 'Admin User', email: 'admin@medivision.com' },
+      { username: 'doctor', password: await bcrypt.hash('doctor123', 10), role: 'clinician', name: 'Dr. Sarah Johnson', email: 'doctor@medivision.com' },
+      { username: 'patient', password: await bcrypt.hash('patient123', 10), role: 'patient', name: 'Patient User', email: 'patient@medivision.com' }
+    ]);
+    res.json({ message: '✅ Users seeded successfully!' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Root route
 app.get('/', (req, res) => {
   res.json({ 

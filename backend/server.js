@@ -13,7 +13,6 @@ app.use(cors({
 }));
 
 // Middleware
-app.use(cors(corsOptions));
 app.use(express.json());
 
 // Routes

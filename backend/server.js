@@ -6,25 +6,11 @@ require('dotenv').config();
 const app = express();
 
 // CORS configuration
-const allowedOrigins = (process.env.CORS_ORIGINS || '')
-  .split(',')
-  .map(origin => origin.trim())
-  .filter(origin => origin.length > 0);
-
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests with no origin (e.g., mobile apps, curl, server-to-server)
-    if (!origin) {
-      return callback(null, true);
-    }
-
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-
-    return callback(new Error('Not allowed by CORS'));
-  }
-};
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Middleware
 app.use(cors(corsOptions));

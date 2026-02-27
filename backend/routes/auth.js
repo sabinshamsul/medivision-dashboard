@@ -41,13 +41,13 @@ router.post('/login', async (req, res) => {
 
     // Find user
     const user = await User.findOne({ username });
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
+    // Use a constant dummy hash when user is not found to mitigate timing attacks
+    const dummyHash = '$2b$10$C.wJvLCYOtJk9gDC11FXGeuXEt3G.yUpiRaY1oCbcnZ6FQcmGeXy2';
+    const hashedPassword = user ? user.password : dummyHash;
 
     // Check password
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
+    const isMatch = await bcrypt.compare(password, hashedPassword);
+    if (!user || !isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 

@@ -6,9 +6,24 @@ const API = axios.create({
 
 // Add token to requests if it exists
 API.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  try {
+    // Ensure window and localStorage are available (e.g., not in SSR)
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return config;
+    }
+
+    const token = window.localStorage.getItem('token');
+
+    // Basic validation: token should be a non-empty string
+    if (typeof token === 'string' && token.trim() !== '') {
+      if (!config.headers) {
+        config.headers = {};
+      }
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  } catch (error) {
+    // Swallow localStorage errors to avoid breaking requests
+    // Optionally log the error here if a logging mechanism exists
   }
   return config;
 });

@@ -173,8 +173,12 @@ mongoose.connect(process.env.MONGO_URI)
   });
 ```
 
+> Note: This script is already included in the repository at `backend/createUsers.js`.  
+> The code above is provided for reference; you do **not** need to recreate the file manually.
+
 **Run it:**
 ```bash
+cd backend
 node createUsers.js
 ```
 

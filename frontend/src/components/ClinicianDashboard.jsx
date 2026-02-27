@@ -9,8 +9,16 @@ export default function ClinicianDashboard() {
   const [activeTab, setActiveTab] = useState('waiting');
 
   useEffect(() => {
-    fetchPatients();
-    const interval = setInterval(fetchPatients, 30000); // Refresh every 30 seconds
+    const runFetchPatients = async () => {
+      try {
+        await fetchPatients();
+      } catch (error) {
+        console.error('Error in scheduled fetchPatients:', error);
+      }
+    };
+
+    runFetchPatients();
+    const interval = setInterval(runFetchPatients, 30000); // Refresh every 30 seconds
     return () => clearInterval(interval);
   }, []);
 
@@ -38,7 +46,25 @@ export default function ClinicianDashboard() {
   };
 
   const handleAssignDoctor = async (patientId) => {
-    const user = JSON.parse(localStorage.getItem('user'));
+    const storedUser = localStorage.getItem('user');
+    if (!storedUser) {
+      console.error('No user information found in localStorage.');
+      return;
+    }
+
+    let user;
+    try {
+      user = JSON.parse(storedUser);
+    } catch (parseError) {
+      console.error('Failed to parse user information from localStorage:', parseError);
+      return;
+    }
+
+    if (!user || typeof user.name !== 'string' || user.name.trim() === '') {
+      console.error('Invalid user information in localStorage: missing or invalid "name" property.');
+      return;
+    }
+
     try {
       await updatePatient(patientId, { 
         assignedDoctor: user.name,
@@ -100,7 +126,17 @@ export default function ClinicianDashboard() {
               <div>
                 <h1 className="text-2xl font-bold text-gray-800">Clinician Dashboard</h1>
                 <p className="text-sm text-gray-600">
-                  Dr. {JSON.parse(localStorage.getItem('user')).name}
+                  Dr. {(() => {
+                    const storedUser = localStorage.getItem('user');
+                    if (!storedUser) return '';
+                    try {
+                      const parsedUser = JSON.parse(storedUser);
+                      return parsedUser && parsedUser.name ? parsedUser.name : '';
+                    } catch (e) {
+                      console.error('Failed to parse user from localStorage:', e);
+                      return '';
+                    }
+                  })()}
                 </p>
               </div>
             </div>

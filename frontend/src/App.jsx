@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './components/Login';
+import RoleSelection from './components/roleselection';
 import PatientRegistration from './components/PatientRegistration';
 import AdminDashboard from './components/AdminDashboard';
 import ClinicianDashboard from './components/ClinicianDashboard';
@@ -39,7 +40,8 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<RoleSelection />} />
+        <Route path="/login" element={<Login />} />
         
         <Route 
           path="/register" 

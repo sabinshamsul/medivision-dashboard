@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './components/Login';
 import PatientRegistration from './components/PatientRegistration';
+import PatientWaitingScreen from './components/PatientWaitingScreen';
 import AdminDashboard from './components/AdminDashboard';
 import ClinicianDashboard from './components/ClinicianDashboard';
 import './index.css';
@@ -41,9 +42,14 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         
-        <Route 
-          path="/register" 
-          element={<PatientRegistration />} 
+        <Route
+          path="/register"
+          element={<PatientRegistration />}
+        />
+
+        <Route
+          path="/waiting/:id"
+          element={<PatientWaitingScreen />}
         />
         
         <Route

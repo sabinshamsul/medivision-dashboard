@@ -40,4 +40,13 @@ export const updatePatient = (id, data) => API.patch(`/patients/${id}`, data);
 export const deletePatient = (id) => API.delete(`/patients/${id}`);
 export const getStats = () => API.get('/patients/stats/overview');
 
+// Queue / Waiting screen
+export const getQueuePosition = (icNumber) => API.get(`/patients/queue?icNumber=${encodeURIComponent(icNumber)}`);
+
+// Vitals submission (nurse)
+export const submitVitals = (patientId, vitals) => API.post(`/patients/${patientId}/vitals`, vitals);
+
+// Triage confirmation (nurse)
+export const confirmTriage = (patientId, data) => API.post(`/patients/${patientId}/triage-confirm`, data);
+
 export default API;

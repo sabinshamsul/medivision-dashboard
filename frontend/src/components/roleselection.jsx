@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, ArrowRight, User, Info } from "lucide-react";
+import { ArrowLeft, ArrowRight, User } from "lucide-react";
 import logoSrc from "../assets/MediVision Logo.png";
 
 const roles = [
@@ -12,44 +12,46 @@ export default function RoleSelection() {
   const [selectedRole, setSelectedRole] = useState(null);
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col font-sans select-none">
+    <div className="min-h-screen flex flex-col select-none" style={{ fontFamily: "'Zen Kaku Gothic Antique', sans-serif", backgroundColor: "#ffffff" }}>
 
       {/* Top Navigation */}
-      <nav className="w-full px-6 py-4 flex items-center justify-between">
-        <button className="flex items-center gap-1.5 text-gray-500 hover:text-gray-700 text-sm transition-colors">
-          <ArrowLeft size={15} strokeWidth={1.8} />
+      <nav className="w-full py-9 flex items-center">
+        <button className="flex items-center gap-1.5 text-gray-500 hover:text-gray-700 transition-colors ml-[580px]" style={{ fontSize: "12.8px" }}>
+          <ArrowLeft size={14} strokeWidth={1.8} />
           <span>Return Back</span>
         </button>
-        <p className="text-sm text-gray-500">
+        <p className="text-gray-500 ml-auto mr-12" style={{ fontSize: "12.8px" }}>
           Haven't become a Member?{" "}
-          <button className="font-bold text-gray-800 hover:text-blue-700 tracking-wide transition-colors">
+          <button className="font-bold text-gray-800 hover:text-blue-700 tracking-wide transition-colors underline" style={{ fontSize: "12.8px" }}>
             SIGN UP NOW
           </button>
         </p>
       </nav>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center px-6 py-8">
+      <main className="flex-1 flex items-center justify-center pl-28 px-6 py-8">
         <div className="flex flex-row items-center justify-center gap-16 lg:gap-28 w-full max-w-3xl">
 
           {/* LEFT: Logo */}
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0" style={{ transform: "translateX(-200px)" }}>
             <img
               src={logoSrc}
               alt="MediVision"
-              className="w-44 h-44 md:w-52 md:h-52 object-contain"
+              className="w-80 h-80 md:w-72 md:h-72 object-contain"
+              style={{ backgroundColor: "#ffffff"}}
             />
           </div>
 
           {/* RIGHT: Role Selection */}
           <div className="w-full max-w-xs md:max-w-sm">
             <div className="text-center mb-6">
-              <h1 className="text-xl md:text-2xl font-bold text-gray-800 tracking-wide">
+              <h1 className="font-bold text-gray-800 tracking-wide" style={{ fontSize: "25px" }}>
                 WELCOME TO{" "}
-                <span style={{ color: "#cc2229" }}>MEDIVISION</span>
+                <span style={{ color: "#1a5caa" }}>MEDI</span>
+                <span style={{ color: "#cc2229" }}>VISION</span>
               </h1>
-              <p className="text-xs text-gray-500 mt-1 tracking-widest font-medium uppercase">
-                Select Your Role
+              <p className="text-gray-500 mt-1 tracking-widest font-medium uppercase" style={{ fontSize: "16px" }}>
+                SELECT YOUR ROLE
               </p>
             </div>
 
@@ -59,8 +61,8 @@ export default function RoleSelection() {
                   key={role.id}
                   onClick={() => setSelectedRole(role.id)}
                   className={`
-                    w-full flex items-center gap-3 px-5 py-4 rounded border text-left text-sm
-                    transition-all duration-150 bg-white
+                    w-full flex items-center gap-3 px-5 py-4 border text-left text-sm
+                    transition-all duration-150 bg-white rounded-none
                     ${selectedRole === role.id
                       ? "border-blue-500 bg-blue-50 text-blue-800"
                       : "border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50"
@@ -80,11 +82,11 @@ export default function RoleSelection() {
             <button
               disabled={!selectedRole}
               className={`
-                w-full flex items-center justify-between px-6 py-4 rounded text-white font-semibold
+                w-full flex items-center justify-between px-6 py-4 rounded-none text-white font-semibold
                 transition-all duration-150
                 ${selectedRole ? "cursor-pointer" : "cursor-not-allowed opacity-70"}
               `}
-              style={{ backgroundColor: selectedRole ? "#1a5caa" : "#7aaad4" }}
+              style={{ backgroundColor: selectedRole ? "#2D5EA4" : "#7aaad4" }}
             >
               <span className="text-sm tracking-wide">Enter</span>
               <ArrowRight size={18} strokeWidth={2} />
@@ -95,12 +97,16 @@ export default function RoleSelection() {
       </main>
 
       {/* Footer */}
-      <footer className="w-full px-6 py-4 flex items-center justify-between">
-        <p className="text-xs text-gray-400">
-          Copyright 2025 - 2026 MediVision Inc. All rights Reserved
+      <footer className="w-full py-9 flex items-center">
+        <p className="text-gray-400 ml-[580px]" style={{ fontSize: "12.8px" }}>
+          Copyright 2025 - 2026 MediVision Inc. All rights Reserved.
         </p>
-        <button className="flex items-center gap-1.5 text-gray-400 hover:text-gray-600 text-xs transition-colors">
-          <Info size={13} strokeWidth={1.8} />
+        <button className="flex items-center gap-1.5 text-gray-400 hover:text-gray-600 transition-colors ml-auto mr-12" style={{ fontSize: "12.8px" }}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="16" x2="12" y2="12" />
+            <line x1="12" y1="8" x2="12.01" y2="8" />
+          </svg>
           <span>Need Help?</span>
         </button>
       </footer>

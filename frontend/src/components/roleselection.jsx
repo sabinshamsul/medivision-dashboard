@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, User } from "lucide-react";
 import logoSrc from "../assets/MediVision Logo.png";
+import needHelpIcon from "../assets/needhelpicon.jpeg";
+import FAQOverlay from "./FAQOverlay";
 
 const roles = [
   { id: "admin", label: "Admin" },
@@ -11,9 +13,11 @@ const roles = [
 
 export default function RoleSelection() {
   const [selectedRole, setSelectedRole] = useState(null);
+  const [isFaqOpen, setIsFaqOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleBackgroundClick = () => {
+    if (isFaqOpen) return;
     setSelectedRole(null);
   };
 
@@ -105,7 +109,17 @@ export default function RoleSelection() {
 
             <button
               disabled={!selectedRole}
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (selectedRole === 'admin') {
+                  navigate('/login-admin');
+                } else if (selectedRole === 'staff') {
+                  navigate('/login-staff');
+                } else if (selectedRole === 'patient') {
+                  navigate('/login-patient');
+                }
+                // Add navigation for other roles later
+              }}
               className={`
                 w-full flex items-center justify-between px-6 py-4 rounded-none text-white font-semibold
                 transition-all duration-150
@@ -127,18 +141,19 @@ export default function RoleSelection() {
           Copyright 2025 - 2026 MediVision Inc. All rights Reserved.
         </p>
         <button 
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsFaqOpen(true);
+          }}
           className="flex items-center gap-1.5 text-gray-400 hover:text-gray-600 transition-colors ml-auto mr-12" 
           style={{ fontSize: "12.8px" }}
         >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10" />
-            <line x1="12" y1="16" x2="12" y2="12" />
-            <line x1="12" y1="8" x2="12.01" y2="8" />
-          </svg>
+          <img src={needHelpIcon} alt="Need Help" className="w-4 h-4 object-contain" />
           <span>Need Help?</span>
         </button>
       </footer>
+
+      <FAQOverlay isOpen={isFaqOpen} onClose={() => setIsFaqOpen(false)} />
     </div>
   );
 }

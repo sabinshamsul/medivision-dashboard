@@ -6,7 +6,7 @@ import needHelpIcon from "../assets/needhelpicon.jpeg";
 import "../password-field.css";
 import FAQOverlay from "./FAQOverlay";
 
-export default function LoginAsAdmin() {
+export default function LoginAsStaff() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -82,7 +82,7 @@ export default function LoginAsAdmin() {
                 <span style={{ color: "#cc2229" }}>VISION</span>
               </h1>
               <p className="text-gray-500 mt-1 font-medium uppercase" style={{ fontSize: "16px", letterSpacing: "0px" }}>
-                LOG IN AS ADMIN
+                LOG IN AS STAFF
               </p>
             </div>
 

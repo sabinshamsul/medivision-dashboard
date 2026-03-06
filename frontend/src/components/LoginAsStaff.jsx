@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, User, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import logoSrc from "../assets/MediVision Logo.png";
-import needHelpIcon from "../assets/needhelpicon.jpeg";
+import NeedHelpIcon from "../assets/NeedHelpIcon.jpeg";
 import "../password-field.css";
 import FAQOverlay from "./FAQOverlay";
 

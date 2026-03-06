@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, User, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import logoSrc from "../assets/MediVision Logo.png";
-import needHelpIcon from "../assets/needhelpicon.jpeg";
+import NeedHelpIcon from "../assets/NeedHelpIcon.jpeg";
 import "../password-field.css";
 import FAQOverlay from "./FAQOverlay";
 
@@ -182,7 +182,7 @@ export default function LoginAsPatient() {
           className="flex items-center gap-1.5 text-gray-400 hover:text-gray-600 transition-colors ml-auto mr-12" 
           style={{ fontSize: "12.8px" }}
         >
-          <img src={needHelpIcon} alt="Need Help" className="w-4 h-4 object-contain" />
+          <img src={NeedHelpIcon} alt="Need Help" className="w-4 h-4 object-contain" />
           <span>Need Help?</span>
         </button>
       </footer>

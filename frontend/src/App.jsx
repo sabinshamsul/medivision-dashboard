@@ -7,6 +7,7 @@ import LoginAsStaff from './components/LoginAsStaff';
 import LoginAsPatient from './components/LoginAsPatient';
 import PatientRegistration from './components/PatientRegistration';
 import AdminDashboard from './components/AdminDashboard';
+import AdminPage from './components/AdminPage';
 import ClinicianDashboard from './components/ClinicianDashboard';
 import './index.css';
 
@@ -55,6 +56,8 @@ function App() {
           path="/register" 
           element={<PatientRegistration />} 
         />
+
+        <Route path="/admin-page" element={<AdminPage />} />
         
         <Route
           path="/admin"

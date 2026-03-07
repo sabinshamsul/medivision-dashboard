@@ -157,6 +157,7 @@ export default function LoginAsAdmin() {
 
             <button
               disabled={!isFormValid}
+              onClick={() => navigate("/admin-page")}
               className={`
                 w-full flex items-center justify-between px-6 py-4 rounded-none text-white font-semibold
                 transition-all duration-150

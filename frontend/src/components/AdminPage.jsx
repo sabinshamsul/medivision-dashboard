@@ -1,102 +1,111 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './AdminPage.css';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import medivisionLogo from "../assets/MediVision Logo.png";
+import "./AdminPage.css";
+
+const newsArticles = [
+  {
+    id: 1,
+    image: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=600&q=80",
+    text: "The Malaysian Hospital Market is expected to reach $19.13b by 2034 at a Compound Annual Growth rate of 5.20%.",
+  },
+  {
+    id: 2,
+    image: "https://images.unsplash.com/photo-1666214280557-f1b5022eb634?w=600&q=80",
+    text: "Malaysia is Set to Adopt the Diagnosis-Related Group (DRG)-Based Hospital Payment System in a Bid to make Healthcare more Efficient, Transparent, and Sustainable.",
+  },
+];
 
 const AdminPage = () => {
   const navigate = useNavigate();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
-
-  const toggleSidebar = () => {
-    setSidebarCollapsed(!sidebarCollapsed);
-  };
-
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-  };
+  const [darkMode, setDarkMode] = useState(true);
 
   return (
-    <div className={`admin-container ${darkMode ? 'dark' : ''}`}>
-      {/* Sidebar */}
-      <aside className={`admin-sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
-        <div className="sidebar-logo">
-          <img src="/medivision-logo.png" alt="MediVision" className="sidebar-logo-img" />
-          {!sidebarCollapsed && <span className="sidebar-logo-text">MEDIVISION</span>}
+    <div className="admin-container">
+      {/* Navbar */}
+      <header className="admin-navbar">
+        <div className="navbar-left">
+          {/* Square MediVision Logo */}
+          <div className="navbar-logo-box">
+            <img src={medivisionLogo} alt="MediVision" className="navbar-logo-img" />
+          </div>
+
+          {/* Return Back */}
+          <button className="navbar-pill-btn" onClick={() => navigate(-1)}>
+            <span className="btn-arrow">‹</span> Return Back
+          </button>
+
+          {/* Divider */}
+          <div className="navbar-divider" />
+
+          {/* Home */}
+          <button className="navbar-pill-btn">Home</button>
+
+          <span className="navbar-dashboard-title">Admin Dashboard</span>
         </div>
 
-        <nav className="sidebar-nav">
-          <ul>
-            <li className="nav-item active">
-              <span className="nav-icon">🏠</span>
-              {!sidebarCollapsed && <span className="nav-label">Dashboard</span>}
-            </li>
-            <li className="nav-item">
-              <span className="nav-icon">👥</span>
-              {!sidebarCollapsed && <span className="nav-label">Patients</span>}
-            </li>
-            <li className="nav-item">
-              <span className="nav-icon">🩺</span>
-              {!sidebarCollapsed && <span className="nav-label">Doctors</span>}
-            </li>
-            <li className="nav-item">
-              <span className="nav-icon">📅</span>
-              {!sidebarCollapsed && <span className="nav-label">Appointments</span>}
-            </li>
-            <li className="nav-item">
-              <span className="nav-icon">🏥</span>
-              {!sidebarCollapsed && <span className="nav-label">Departments</span>}
-            </li>
-            <li className="nav-item">
-              <span className="nav-icon">📊</span>
-              {!sidebarCollapsed && <span className="nav-label">Reports</span>}
-            </li>
-            <li className="nav-item">
-              <span className="nav-icon">⚙️</span>
-              {!sidebarCollapsed && <span className="nav-label">Settings</span>}
-            </li>
-          </ul>
-        </nav>
+        <div className="navbar-right">
+          {/* Dark/Light Mode Toggle */}
+          <button
+            className="navbar-circle-btn"
+            onClick={() => setDarkMode(!darkMode)}
+            title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          >
+            {darkMode ? "🌙" : "☀️"}
+          </button>
 
-        <button className="sidebar-toggle" onClick={toggleSidebar}>
-          {sidebarCollapsed ? '→' : '←'}
-        </button>
-      </aside>
+          {/* Notification */}
+          <button className="navbar-circle-btn" title="Notifications">
+            💬
+          </button>
 
-      {/* Main Content Area */}
-      <div className="admin-main">
-        {/* Navbar */}
-        <header className="admin-navbar">
-          <div className="navbar-left">
-            <button className="navbar-btn" onClick={() => navigate(-1)}>
-              <span>‹</span> Return Back
-            </button>
-            <button className="navbar-btn active">Home</button>
-            <span className="navbar-title">Admin Portal</span>
-          </div>
-
-          <div className="navbar-right">
-            <button className="navbar-icon-btn" onClick={toggleDarkMode} title="Toggle Dark Mode">
-              🌙
-            </button>
-            <button className="navbar-icon-btn">
-              <span className="navbar-user-icon">👤</span>
-              <span>Admin</span>
-            </button>
-            <button className="navbar-icon-btn">💬</button>
-            <button className="navbar-icon-btn">⚙️</button>
-            <button className="navbar-btn logout-btn" onClick={() => navigate('/login')}>
-              🚪 Log Out
-            </button>
-          </div>
-        </header>
-
-        {/* Page Content - Empty area ready for future content */}
-        <div className="admin-content">
-          <div className="admin-welcome-card">
-            <h2>Welcome, Admin</h2>
-            <p>Select an option from the sidebar to get started.</p>
-          </div>
+          {/* Log Out */}
+          <button
+            className="navbar-pill-btn logout"
+            onClick={() => {
+              localStorage.removeItem("token");
+              localStorage.removeItem("user");
+              navigate("/");
+            }}
+          >
+            ⏻ Log Out
+          </button>
         </div>
+      </header>
+
+      {/* Body: sidebar + content */}
+      <div className="admin-body">
+        {/* Sidebar - empty blue strip */}
+        <div className="admin-sidebar" />
+
+        {/* Content */}
+        <main className={`admin-content ${darkMode ? "" : "light"}`}>
+          {/* Welcome heading */}
+          <h2 className="welcome-heading">
+            WELCOME TO <span className="text-blue">MEDI</span>
+            <span className="text-red">VISION</span>
+          </h2>
+
+          {/* Big Logo on white card */}
+          <div className="welcome-logo-card">
+            <img src={medivisionLogo} alt="MediVision Logo" className="welcome-logo" />
+          </div>
+
+          {/* News Cards */}
+          <div className="news-cards">
+            {newsArticles.map((article) => (
+              <div key={article.id} className={`news-card ${darkMode ? "" : "light"}`}>
+                <img src={article.image} alt="news" className="news-card-img" />
+                <div className="news-card-body">
+                  <p className="news-card-text">{article.text}</p>
+                  <div className="news-card-action">
+                    <button className="read-more-btn">Read More</button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </main>
       </div>
 
       {/* Feedback Button */}

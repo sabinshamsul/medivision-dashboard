@@ -1,143 +1,12 @@
 /* ===== Base Layout ===== */
 .admin-container {
   display: flex;
+  flex-direction: column;
   min-height: 100vh;
-  background-color: #e8ecf1;
+  background-color: #0b1929;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   position: relative;
-}
-
-/* ===== Dark Mode ===== */
-.admin-container.dark {
-  background-color: #1a1a2e;
-  color: #e0e0e0;
-}
-
-.admin-container.dark .admin-navbar {
-  background-color: #16213e;
-}
-
-.admin-container.dark .admin-sidebar {
-  background-color: #0f3460;
-}
-
-.admin-container.dark .admin-welcome-card {
-  background-color: #16213e;
-  color: #e0e0e0;
-}
-
-.admin-container.dark .navbar-btn {
-  color: #e0e0e0;
-}
-
-.admin-container.dark .nav-item {
-  color: #cbd5e1;
-}
-
-.admin-container.dark .nav-item:hover {
-  background-color: #1a2a5e;
-}
-
-/* ===== Sidebar ===== */
-.admin-sidebar {
-  width: 240px;
-  background-color: #1a3b7a;
   color: #fff;
-  display: flex;
-  flex-direction: column;
-  transition: width 0.3s ease;
-  position: relative;
-  z-index: 10;
-}
-
-.admin-sidebar.collapsed {
-  width: 70px;
-}
-
-.sidebar-logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 20px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-.sidebar-logo-img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.sidebar-logo-text {
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 1px;
-}
-
-.sidebar-nav {
-  flex: 1;
-  padding: 16px 0;
-}
-
-.sidebar-nav ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 20px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  font-size: 14px;
-  border-left: 3px solid transparent;
-}
-
-.nav-item:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.nav-item.active {
-  background-color: rgba(255, 255, 255, 0.15);
-  border-left: 3px solid #fff;
-}
-
-.nav-icon {
-  font-size: 18px;
-  min-width: 24px;
-  text-align: center;
-}
-
-.nav-label {
-  white-space: nowrap;
-}
-
-.sidebar-toggle {
-  background: rgba(255, 255, 255, 0.15);
-  border: none;
-  color: #fff;
-  padding: 10px;
-  cursor: pointer;
-  font-size: 16px;
-  margin: 10px;
-  border-radius: 6px;
-  transition: background-color 0.2s;
-}
-
-.sidebar-toggle:hover {
-  background: rgba(255, 255, 255, 0.25);
-}
-
-/* ===== Main Area ===== */
-.admin-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
 }
 
 /* ===== Navbar ===== */
@@ -145,11 +14,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #1a3b7a;
-  padding: 10px 24px;
+  background-color: #2D5EA4;
+  padding: 6px 20px;
   color: #fff;
   height: 60px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  z-index: 10;
+  flex-shrink: 0;
 }
 
 .navbar-left {
@@ -164,108 +35,253 @@
   gap: 10px;
 }
 
-.navbar-btn {
+/* Square Logo Block in Navbar */
+.navbar-logo-box {
+  width: 48px;
+  height: 48px;
+  background: #fff;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.navbar-logo-img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+}
+
+/* Pill Buttons (Return Back, Home, Log Out) */
+.navbar-pill-btn {
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
   color: #fff;
-  padding: 6px 16px;
-  border-radius: 20px;
+  padding: 7px 20px;
+  border-radius: 25px;
   cursor: pointer;
   font-size: 13px;
+  font-weight: 500;
   transition: all 0.2s;
   display: flex;
   align-items: center;
   gap: 6px;
+  white-space: nowrap;
 }
 
-.navbar-btn:hover {
+.navbar-pill-btn:hover {
   background-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.7);
 }
 
-.navbar-btn.active {
-  background-color: #fff;
-  color: #1a3b7a;
-  font-weight: 600;
-}
-
-.navbar-title {
-  font-size: 15px;
-  font-weight: 500;
-  margin-left: 8px;
-  opacity: 0.9;
-}
-
-.navbar-icon-btn {
-  background: transparent;
-  border: none;
-  color: #fff;
+.navbar-pill-btn .btn-arrow {
   font-size: 18px;
-  cursor: pointer;
-  padding: 6px 10px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: background-color 0.2s;
+  font-weight: 700;
+  line-height: 1;
 }
 
-.navbar-icon-btn:hover {
-  background-color: rgba(255, 255, 255, 0.15);
+/* Active pill (Home) - same style as other pills */
+
+/* Logout pill */
+.navbar-pill-btn.logout {
+  border-color: rgba(255, 255, 255, 0.45);
 }
 
-.navbar-icon-btn span {
-  font-size: 13px;
-}
-
-.navbar-user-icon {
-  font-size: 18px !important;
-}
-
-.logout-btn {
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.logout-btn:hover {
+.navbar-pill-btn.logout:hover {
   background-color: rgba(220, 53, 69, 0.7);
   border-color: rgba(220, 53, 69, 0.7);
+}
+
+/* Vertical Divider */
+.navbar-divider {
+  width: 1.5px;
+  height: 28px;
+  background-color: rgba(255, 255, 255, 0.35);
+  margin: 0 2px;
+  flex-shrink: 0;
+}
+
+/* Circle Buttons (dark mode, notification) */
+.navbar-circle-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.navbar-circle-btn:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+/* Dashboard title text */
+.navbar-dashboard-title {
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0.85;
+  margin-left: 4px;
+  white-space: nowrap;
+}
+
+/* ===== Content Area (with sidebar) ===== */
+.admin-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ===== Sidebar (empty blue strip) ===== */
+.admin-sidebar {
+  width: 80px;
+  background-color: #2D5EA4;
+  flex-shrink: 0;
 }
 
 /* ===== Content Area ===== */
 .admin-content {
   flex: 1;
-  padding: 32px;
+  padding: 40px 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   overflow-y: auto;
+  background-color: #0b1929;
+  transition: background-color 0.3s;
 }
 
-.admin-welcome-card {
+.admin-content.light {
+  background-color: #e8ecf1;
+}
+
+.welcome-heading {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #e0e6f0;
+  margin: 0 0 32px;
+  text-align: center;
+}
+
+.admin-content.light .welcome-heading {
+  color: #222;
+}
+
+.text-blue {
+  color: #2D5EA4;
+}
+
+.text-red {
+  color: #c0392b;
+}
+
+/* White card behind logo */
+.welcome-logo-card {
+  margin-bottom: 40px;
   background: #fff;
-  border-radius: 14px;
-  padding: 40px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-  border: 1px solid #dce3ed;
+  border-radius: 16px;
+  padding: 24px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
 }
 
-.admin-welcome-card h2 {
-  font-size: 24px;
-  color: #1a3b7a;
-  margin: 0 0 8px 0;
+.welcome-logo {
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+  display: block;
 }
 
-.admin-welcome-card p {
-  font-size: 15px;
-  color: #666;
-  margin: 0;
+/* ===== News Cards ===== */
+.news-cards {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
-/* ===== Feedback Button ===== */
+.news-card {
+  background: #162a45;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+.news-card.light {
+  background: #d6ecf7;
+}
+
+.news-card-img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+}
+
+.news-card-body {
+  padding: 16px 20px 8px;
+}
+
+.news-card-text {
+  font-size: 13px;
+  color: #c8d8e8;
+  line-height: 1.6;
+  margin: 0 0 14px;
+  font-weight: 600;
+}
+
+.news-card.light .news-card-text {
+  color: #222;
+}
+
+.news-card-action {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 12px;
+}
+
+.read-more-btn {
+  background: transparent;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  color: #7ab3f0;
+  padding: 5px 22px;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.news-card.light .read-more-btn {
+  border-color: #2D5EA4;
+  color: #2D5EA4;
+}
+
+.read-more-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* ===== Feedback Button (right edge) ===== */
 .admin-feedback-btn {
   position: fixed;
-  right: 0;
+  right: -26px;
   top: 50%;
   transform: translateY(-50%) rotate(-90deg);
   transform-origin: right center;
-  background-color: #1a3b7a;
+  background-color: #c0392b;
   color: #fff;
   border: none;
   padding: 8px 20px;
@@ -274,14 +290,13 @@
   border-radius: 6px 6px 0 0;
   z-index: 100;
   letter-spacing: 0.5px;
-  right: -26px;
 }
 
 .admin-feedback-btn:hover {
-  background-color: #2a4f9e;
+  background-color: #e74c3c;
 }
 
-/* ===== Help Button ===== */
+/* ===== Help Button (bottom-right) ===== */
 .admin-help {
   position: fixed;
   bottom: 20px;
@@ -297,45 +312,40 @@
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background-color: #1a3b7a;
+  background-color: #2D5EA4;
   color: #fff;
   border: none;
   font-size: 24px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   transition: transform 0.2s, background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .admin-help-btn:hover {
   transform: scale(1.1);
-  background-color: #2a4f9e;
+  background-color: #3a73bf;
 }
 
 .help-label {
   font-size: 11px;
-  color: #666;
+  color: #8899aa;
 }
 
 /* ===== Responsive ===== */
 @media (max-width: 768px) {
-  .admin-sidebar {
-    width: 70px;
-  }
-
-  .nav-label,
-  .sidebar-logo-text {
-    display: none;
-  }
-
   .admin-navbar {
-    padding: 10px 12px;
+    padding: 6px 12px;
+    gap: 6px;
   }
 
-  .navbar-title {
+  .navbar-dashboard-title {
     display: none;
   }
 
   .admin-content {
-    padding: 16px;
+    padding: 20px 16px;
   }
 }

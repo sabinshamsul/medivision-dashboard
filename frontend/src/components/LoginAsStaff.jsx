@@ -182,7 +182,7 @@ export default function LoginAsStaff() {
           className="flex items-center gap-1.5 text-gray-400 hover:text-gray-600 transition-colors ml-auto mr-12" 
           style={{ fontSize: "12.8px" }}
         >
-          <img src={needHelpIcon} alt="Need Help" className="w-4 h-4 object-contain" />
+          <img src={NeedHelpIcon} alt="Need Help" className="w-4 h-4 object-contain" />
           <span>Need Help?</span>
         </button>
       </footer>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getPatients, updatePatient } from '../services/api';
-import { Stethoscope, User, Clock, AlertCircle, CheckCircle, Activity } from 'lucide-react';
+import { Stethoscope, User, Clock, AlertCircle, CheckCircle, Activity, MapPin } from 'lucide-react';
 import VitalsFormModal from './VitalsFormModal';
 
 export default function ClinicianDashboard() {
@@ -285,6 +285,17 @@ export default function ClinicianDashboard() {
                           Nurse override — {patient.nurseOverrideReason}
                         </p>
                       )}
+                    </div>
+                  )}
+
+                  {/* Location assignment */}
+                  {patient.assignedLocation && (
+                    <div className="mb-4">
+                      <p className="text-xs text-gray-600 mb-1">Assigned Location:</p>
+                      <div className="flex items-center gap-2">
+                        <MapPin size={14} className="text-blue-600" />
+                        <p className="text-sm font-medium text-blue-800">{patient.assignedLocation}</p>
+                      </div>
                     </div>
                   )}
 

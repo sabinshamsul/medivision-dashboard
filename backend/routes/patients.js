@@ -73,13 +73,9 @@ router.get('/queue', async (req, res) => {
     const totalWaiting = await Patient.countDocuments({ status: 'Registered' });
 
     res.json({
-      patientId: patient.patientId,
-      queueNumber: patient.queueNumber,
-      name: patient.name,
-      status: patient.status,
+      ...patient.toObject(),
       position,
-      totalWaiting,
-      arrivalTime: patient.arrivalTime
+      totalWaiting
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -198,6 +194,14 @@ router.post('/:id/triage-confirm', async (req, res) => {
     patient.triagedBy = req.body.triagedBy;
     patient.triageTimestamp = new Date();
     patient.status = 'Triaged';
+
+    // Auto-assign location based on Malaysian ER activity diagram
+    const locationMap = {
+      1: 'Resuscitation Zone',  // Cat 1 (Red) - Immediate resus
+      2: 'ED Bed',              // Cat 2 (Yellow) - Urgent but stable
+      3: 'Waiting Area'         // Cat 3 (Green) - Non-urgent
+    };
+    patient.assignedLocation = locationMap[req.body.confirmedCategory] || 'Waiting Area';
 
     const updatedPatient = await patient.save();
     res.json(updatedPatient);

@@ -23,7 +23,7 @@ const patientSchema = new mongoose.Schema({
   },
   gender: {
     type: String,
-    enum: ['Male', 'Female', 'Other'],
+    enum: ['Male', 'Female'],
     required: true
   },
   contactNumber: {
@@ -106,6 +106,13 @@ const patientSchema = new mongoose.Schema({
 
   assignedDoctor: {
     type: String,
+    default: null
+  },
+
+  // Location assignment based on triage category (Malaysian ER activity diagram)
+  assignedLocation: {
+    type: String,
+    enum: ['Resuscitation Zone', 'ED Bed', 'Waiting Area'],
     default: null
   }
 }, {

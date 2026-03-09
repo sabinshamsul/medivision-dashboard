@@ -22,6 +22,8 @@ function getStatusIndex(status) {
 }
 
 function getStepState(stepMinStatus, currentStatus) {
+  // Discharged is terminal — its own step should show as completed, not current
+  if (currentStatus === 'Discharged' && stepMinStatus === 'Discharged') return 'completed';
   const stepIdx = getStatusIndex(stepMinStatus);
   const currentIdx = getStatusIndex(currentStatus);
 
@@ -30,21 +32,83 @@ function getStepState(stepMinStatus, currentStatus) {
   return 'pending';
 }
 
-function getStepTimestamp(stepIndex, patient) {
-  if (!patient) return null;
-  switch (stepIndex) {
-    case 0: return patient.arrivalTime;
-    case 1: return patient.triageTimestamp;
-    case 2: return patient.triageTimestamp;
-    case 3: return getStatusIndex(patient.status) >= 3 ? patient.updatedAt : null;
-    case 4: return patient.status === 'Discharged' ? patient.updatedAt : null;
-    default: return null;
-  }
-}
 
 function formatTime(dateStr) {
   if (!dateStr) return null;
   return new Date(dateStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function formatDuration(ms) {
+  const totalMins = Math.round(Math.abs(ms) / 60000);
+  if (totalMins < 60) return `${totalMins} minute${totalMins !== 1 ? 's' : ''}`;
+  const h = Math.floor(totalMins / 60);
+  const m = totalMins % 60;
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
+
+function getPatientTimestamps(patient) {
+  return {
+    checkIn:        patient?.arrivalTime                   ? new Date(patient.arrivalTime) : null,
+    triageComplete: patient?.triageTimestamp               ? new Date(patient.triageTimestamp) : null,
+    treatmentStart: patient?.treatment?.treatmentStartTime ? new Date(patient.treatment.treatmentStartTime) : null,
+    treatmentEnd:   patient?.treatment?.treatmentEndTime   ? new Date(patient.treatment.treatmentEndTime) : null,
+  };
+}
+
+function getStepDisplayData(index, patient) {
+  if (!patient) return { primaryTime: null, durationLabel: null };
+  const ts = getPatientTimestamps(patient);
+  const now = new Date();
+
+  switch (index) {
+    case 0: // Checked In
+      return { primaryTime: formatTime(ts.checkIn), durationLabel: null };
+
+    case 1: { // Triage Assessment — duration from check-in to triage complete
+      const durationMs = ts.triageComplete && ts.checkIn
+        ? ts.triageComplete - ts.checkIn
+        : ts.checkIn ? now - ts.checkIn : null;
+      return {
+        primaryTime: formatTime(ts.triageComplete),
+        durationLabel: durationMs != null ? `Duration: ${formatDuration(durationMs)}` : null,
+      };
+    }
+
+    case 2: { // Waiting for Doctor — triage complete → treatment start
+      const start = ts.triageComplete;
+      const end = ts.treatmentStart;
+      const durationMs = start && end ? end - start : start ? now - start : null;
+      return {
+        primaryTime: start && end
+          ? `${formatTime(start)} – ${formatTime(end)}`
+          : formatTime(start),
+        durationLabel: durationMs != null ? `Wait time: ${formatDuration(durationMs)}` : null,
+      };
+    }
+
+    case 3: { // Medical Examination — treatment start → treatment end
+      const start = ts.treatmentStart;
+      const end = ts.treatmentEnd;
+      const durationMs = start && end ? end - start : start ? now - start : null;
+      return {
+        primaryTime: start && end
+          ? `${formatTime(start)} – ${formatTime(end)}`
+          : formatTime(start),
+        durationLabel: durationMs != null ? `Consultation: ${formatDuration(durationMs)}` : null,
+      };
+    }
+
+    case 4: { // Treatment / Discharge
+      const disposition = patient.treatment?.disposition;
+      return {
+        primaryTime: formatTime(ts.treatmentEnd),
+        durationLabel: disposition || null,
+      };
+    }
+
+    default:
+      return { primaryTime: null, durationLabel: null };
+  }
 }
 
 function getEstimatedWait(patient, queueInfo) {
@@ -366,7 +430,11 @@ export default function PatientWaitingScreen() {
                   `You are currently being treated${patient.assignedDoctor ? ` by Dr. ${patient.assignedDoctor}` : ''}. Please follow your doctor's instructions.`
                 )}
                 {patient.status === 'Discharged' && (
-                  'You have been discharged. Thank you for visiting MediVision. Please follow your discharge instructions.'
+                  patient.treatment?.disposition === 'Admit'
+                    ? 'Your treatment is complete. You will be admitted for further care. Please follow the staff\'s instructions for your admission.'
+                    : patient.treatment?.disposition === 'Referral'
+                    ? 'Your treatment is complete. You have been referred for specialist consultation. Please check with the front desk for your referral details.'
+                    : 'You have been discharged. Thank you for visiting MediVision. Please follow your discharge instructions and take care.'
                 )}
               </p>
             </div>
@@ -393,8 +461,7 @@ export default function PatientWaitingScreen() {
                 <div className="space-y-8">
                   {JOURNEY_STEPS.map((step, index) => {
                     const state = getStepState(step.minStatus, patient.status);
-                    const timestamp = getStepTimestamp(index, patient);
-                    const timeStr = formatTime(timestamp);
+                    const { primaryTime, durationLabel } = getStepDisplayData(index, patient);
 
                     return (
                       <div key={index} className="relative flex items-start gap-4">
@@ -429,16 +496,25 @@ export default function PatientWaitingScreen() {
                           }`}>
                             {step.label}
                           </p>
-                          <p className={`text-sm ${
-                            state === 'completed' ? 'text-green-600' :
-                            state === 'current' ? 'text-blue-500' :
-                            'text-gray-400'
-                          }`}>
-                            {state === 'completed' && timeStr && `${timeStr} - Completed`}
-                            {state === 'completed' && !timeStr && 'Completed'}
-                            {state === 'current' && 'Current - In Progress'}
-                            {state === 'pending' && 'Pending'}
-                          </p>
+                          {state === 'pending' ? (
+                            <p className="text-sm text-gray-400">Pending</p>
+                          ) : (
+                            <>
+                              {primaryTime && (
+                                <p className={`text-sm ${
+                                  state === 'current' ? 'text-blue-500' : 'text-gray-600'
+                                }`}>
+                                  {primaryTime}
+                                </p>
+                              )}
+                              {durationLabel && (
+                                <p className="text-xs text-gray-400 mt-0.5">{durationLabel}</p>
+                              )}
+                              {state === 'current' && !primaryTime && (
+                                <p className="text-sm text-blue-500">In Progress</p>
+                              )}
+                            </>
+                          )}
                         </div>
                       </div>
                     );

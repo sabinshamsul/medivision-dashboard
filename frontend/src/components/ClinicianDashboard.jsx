@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { getPatients, updatePatient } from '../services/api';
 import { Stethoscope, User, Clock, AlertCircle, CheckCircle, Activity, MapPin } from 'lucide-react';
 import VitalsFormModal from './VitalsFormModal';
+import TreatmentFormModal from './TreatmentFormModal';
 
 export default function ClinicianDashboard() {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('registered');
   const [vitalsModalPatient, setVitalsModalPatient] = useState(null);
+  const [treatmentModalPatient, setTreatmentModalPatient] = useState(null);
 
   useEffect(() => {
     const runFetchPatients = async () => {
@@ -43,31 +45,13 @@ export default function ClinicianDashboard() {
     }
   };
 
-  const handleAssignDoctor = async (patientId) => {
-    const storedUser = localStorage.getItem('user');
-    if (!storedUser) return;
-
-    let user;
+  const handleStartTreatment = async (patient) => {
+    setTreatmentModalPatient(patient);
     try {
-      user = JSON.parse(storedUser);
-    } catch (parseError) {
-      console.error('Failed to parse user:', parseError);
-      return;
-    }
-
-    if (!user || typeof user.name !== 'string' || user.name.trim() === '') {
-      console.error('Invalid user info: missing name');
-      return;
-    }
-
-    try {
-      await updatePatient(patientId, {
-        assignedDoctor: user.name,
-        status: 'In Treatment'
-      });
-      fetchPatients();
+      await updatePatient(patient._id, { status: 'In Treatment' });
+      await fetchPatients();
     } catch (error) {
-      console.error('Error assigning doctor:', error);
+      console.error('Error starting treatment:', error);
     }
   };
 
@@ -353,7 +337,7 @@ export default function ClinicianDashboard() {
                     )}
                     {patient.status === 'Triaged' && (
                       <button
-                        onClick={() => handleAssignDoctor(patient._id)}
+                        onClick={() => handleStartTreatment(patient)}
                         className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium"
                       >
                         Start Treatment
@@ -361,10 +345,10 @@ export default function ClinicianDashboard() {
                     )}
                     {patient.status === 'In Treatment' && (
                       <button
-                        onClick={() => handleUpdateStatus(patient._id, 'Discharged')}
+                        onClick={() => setTreatmentModalPatient(patient)}
                         className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition text-sm font-medium"
                       >
-                        Discharge Patient
+                        Complete Treatment
                       </button>
                     )}
                   </div>
@@ -382,6 +366,18 @@ export default function ClinicianDashboard() {
           onClose={() => setVitalsModalPatient(null)}
           onVitalsSubmitted={() => {
             setVitalsModalPatient(null);
+            fetchPatients();
+          }}
+        />
+      )}
+
+      {/* Treatment Modal */}
+      {treatmentModalPatient && (
+        <TreatmentFormModal
+          patient={treatmentModalPatient}
+          onClose={() => setTreatmentModalPatient(null)}
+          onTreatmentCompleted={() => {
+            setTreatmentModalPatient(null);
             fetchPatients();
           }}
         />

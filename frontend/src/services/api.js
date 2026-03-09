@@ -49,4 +49,7 @@ export const submitVitals = (patientId, vitals) => API.post(`/patients/${patient
 // Triage confirmation (nurse)
 export const confirmTriage = (patientId, data) => API.post(`/patients/${patientId}/triage-confirm`, data);
 
+// Treatment completion (clinician)
+export const completeTreatment = (patientId, data) => API.post(`/patients/${patientId}/treatment`, data);
+
 export default API;

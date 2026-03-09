@@ -33,6 +33,31 @@ router.get('/stats/overview', async (req, res) => {
       }
     ]);
 
+    // Average triage time: arrivalTime → triageTimestamp (minutes)
+    const triageTimeAgg = await Patient.aggregate([
+      { $match: { triageTimestamp: { $ne: null }, arrivalTime: { $ne: null } } },
+      { $project: { d: { $divide: [{ $subtract: ['$triageTimestamp', '$arrivalTime'] }, 60000] } } },
+      { $group: { _id: null, avg: { $avg: '$d' } } }
+    ]);
+
+    // Average waiting time: triageTimestamp → treatment.treatmentStartTime (minutes)
+    const waitingTimeAgg = await Patient.aggregate([
+      { $match: { triageTimestamp: { $ne: null }, 'treatment.treatmentStartTime': { $ne: null } } },
+      { $project: { d: { $divide: [{ $subtract: ['$treatment.treatmentStartTime', '$triageTimestamp'] }, 60000] } } },
+      { $group: { _id: null, avg: { $avg: '$d' } } }
+    ]);
+
+    // Average consultation time: treatmentStartTime → treatmentEndTime (minutes)
+    const consultTimeAgg = await Patient.aggregate([
+      { $match: { 'treatment.treatmentStartTime': { $ne: null }, 'treatment.treatmentEndTime': { $ne: null } } },
+      { $project: { d: { $divide: [{ $subtract: ['$treatment.treatmentEndTime', '$treatment.treatmentStartTime'] }, 60000] } } },
+      { $group: { _id: null, avg: { $avg: '$d' } } }
+    ]);
+
+    const edCongestion = await Patient.countDocuments({ status: { $ne: 'Discharged' } });
+
+    const round1 = (v) => v != null ? Math.round(v * 10) / 10 : null;
+
     res.json({
       totalPatients,
       registered,
@@ -40,7 +65,11 @@ router.get('/stats/overview', async (req, res) => {
       triaged,
       inTreatment,
       discharged,
-      triageStats
+      triageStats,
+      averageTriageTime: round1(triageTimeAgg[0]?.avg),
+      averageWaitingTime: round1(waitingTimeAgg[0]?.avg),
+      averageConsultationTime: round1(consultTimeAgg[0]?.avg),
+      edCongestion
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -202,6 +231,50 @@ router.post('/:id/triage-confirm', async (req, res) => {
       3: 'Waiting Area'         // Cat 3 (Green) - Non-urgent
     };
     patient.assignedLocation = locationMap[req.body.confirmedCategory] || 'Waiting Area';
+
+    const updatedPatient = await patient.save();
+    res.json(updatedPatient);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Complete treatment (clinician)
+router.post('/:id/treatment', async (req, res) => {
+  try {
+    const patient = await Patient.findById(req.params.id);
+    if (!patient) {
+      return res.status(404).json({ message: 'Patient not found' });
+    }
+
+    if (patient.status !== 'In Treatment') {
+      return res.status(400).json({ message: 'Treatment can only be completed for patients currently in treatment' });
+    }
+
+    const { provisionalDiagnosis, clinicalNotes, treatmentGiven, disposition, dispositionReason, treatedBy } = req.body;
+
+    if (!provisionalDiagnosis || !provisionalDiagnosis.trim()) {
+      return res.status(400).json({ message: 'Provisional diagnosis is required' });
+    }
+    if (!disposition || !['Discharge', 'Admit', 'Referral'].includes(disposition)) {
+      return res.status(400).json({ message: 'Valid disposition is required (Discharge, Admit, or Referral)' });
+    }
+    if (!dispositionReason || !dispositionReason.trim()) {
+      return res.status(400).json({ message: 'Reason for disposition is required' });
+    }
+
+    patient.treatment = {
+      provisionalDiagnosis: provisionalDiagnosis.trim(),
+      clinicalNotes: clinicalNotes || '',
+      treatmentGiven: treatmentGiven || '',
+      disposition,
+      dispositionReason: dispositionReason.trim(),
+      treatedBy: treatedBy || patient.assignedDoctor,
+      treatmentStartTime: patient.updatedAt,
+      treatmentEndTime: new Date()
+    };
+
+    patient.status = 'Discharged';
 
     const updatedPatient = await patient.save();
     res.json(updatedPatient);

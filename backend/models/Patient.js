@@ -114,6 +114,21 @@ const patientSchema = new mongoose.Schema({
     type: String,
     enum: ['Resuscitation Zone', 'ED Bed', 'Waiting Area'],
     default: null
+  },
+
+  // Treatment record (entered by clinician)
+  treatment: {
+    provisionalDiagnosis: String,
+    clinicalNotes: String,
+    treatmentGiven: String,
+    disposition: {
+      type: String,
+      enum: ['Discharge', 'Admit', 'Referral']
+    },
+    dispositionReason: String,
+    treatedBy: String,
+    treatmentStartTime: Date,
+    treatmentEndTime: Date
   }
 }, {
   timestamps: true

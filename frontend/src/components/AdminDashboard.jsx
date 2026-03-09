@@ -74,6 +74,15 @@ export default function AdminDashboard() {
     );
   }
 
+  const formatMetricDuration = (minutes) => {
+    if (minutes == null) return '—';
+    const mins = Math.round(minutes);
+    if (mins < 60) return `${mins} min`;
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return m > 0 ? `${h}h ${m}m` : `${h}h`;
+  };
+
   const triageData = stats?.triageStats?.map(item => ({
     name: getTriageLabel(item._id),
     value: item.count
@@ -149,6 +158,35 @@ export default function AdminDashboard() {
           </div>
         </div>
 
+        {/* Performance Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white rounded-xl shadow p-6">
+            <p className="text-xs font-semibold text-purple-600 uppercase tracking-wide mb-1">Avg Triage Time</p>
+            <p className="text-3xl font-bold text-purple-700">{formatMetricDuration(stats?.averageTriageTime)}</p>
+            <p className="text-xs text-gray-400 mt-1">Check-in → Triage complete</p>
+          </div>
+          <div className="bg-white rounded-xl shadow p-6">
+            <p className="text-xs font-semibold text-orange-600 uppercase tracking-wide mb-1">Avg Wait Time</p>
+            <p className="text-3xl font-bold text-orange-600">{formatMetricDuration(stats?.averageWaitingTime)}</p>
+            <p className="text-xs text-gray-400 mt-1">Triage complete → Doctor</p>
+          </div>
+          <div className="bg-white rounded-xl shadow p-6">
+            <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-1">Avg Consultation</p>
+            <p className="text-3xl font-bold text-blue-700">{formatMetricDuration(stats?.averageConsultationTime)}</p>
+            <p className="text-xs text-gray-400 mt-1">Doctor start → end</p>
+          </div>
+          <div className="bg-white rounded-xl shadow p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-red-600 uppercase tracking-wide mb-1">ED Congestion</p>
+                <p className="text-3xl font-bold text-red-600">{stats?.edCongestion ?? 0}</p>
+                <p className="text-xs text-gray-400 mt-1">Patients not discharged</p>
+              </div>
+              <AlertCircle className="text-red-300" size={36} />
+            </div>
+          </div>
+        </div>
+
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <div className="bg-white rounded-xl shadow p-6">
@@ -208,6 +246,8 @@ export default function AdminDashboard() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">IC Number</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Triage</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Location</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Diagnosis</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Disposition</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Arrival Time</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
@@ -232,6 +272,12 @@ export default function AdminDashboard() {
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
                       {patient.assignedLocation || '—'}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {patient.treatment?.provisionalDiagnosis || '—'}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {patient.treatment?.disposition || '—'}
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(patient.status)}`}>

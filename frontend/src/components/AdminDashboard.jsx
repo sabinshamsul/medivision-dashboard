@@ -3,13 +3,12 @@ import { getPatients, getStats, updatePatient } from '../services/api';
 import { Users, Activity, Clock, TrendingUp, AlertCircle } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
-const COLORS = ['#ef4444', '#f59e0b', '#eab308', '#22c55e', '#3b82f6'];
+const COLORS = ['#ef4444', '#eab308', '#22c55e'];
 
 export default function AdminDashboard() {
   const [patients, setPatients] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedPatient, setSelectedPatient] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -42,17 +41,22 @@ export default function AdminDashboard() {
   const getTriageColor = (category) => {
     const colors = {
       1: 'bg-red-100 text-red-800 border-red-300',
-      2: 'bg-orange-100 text-orange-800 border-orange-300',
-      3: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-      4: 'bg-green-100 text-green-800 border-green-300',
-      5: 'bg-blue-100 text-blue-800 border-blue-300'
+      2: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+      3: 'bg-green-100 text-green-800 border-green-300'
     };
-    return colors[category] || colors[3];
+    return colors[category] || 'bg-gray-100 text-gray-800 border-gray-300';
+  };
+
+  const getTriageLabel = (category) => {
+    const labels = { 1: 'Cat 1 (Red)', 2: 'Cat 2 (Yellow)', 3: 'Cat 3 (Green)' };
+    return labels[category] || 'Not triaged';
   };
 
   const getStatusColor = (status) => {
     const colors = {
-      'Waiting': 'bg-yellow-100 text-yellow-800',
+      'Registered': 'bg-purple-100 text-purple-800',
+      'Vitals Taken': 'bg-indigo-100 text-indigo-800',
+      'Triaged': 'bg-orange-100 text-orange-800',
       'In Treatment': 'bg-blue-100 text-blue-800',
       'Discharged': 'bg-green-100 text-green-800'
     };
@@ -70,8 +74,17 @@ export default function AdminDashboard() {
     );
   }
 
+  const formatMetricDuration = (minutes) => {
+    if (minutes == null) return '—';
+    const mins = Math.round(minutes);
+    if (mins < 60) return `${mins} min`;
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return m > 0 ? `${h}h ${m}m` : `${h}h`;
+  };
+
   const triageData = stats?.triageStats?.map(item => ({
-    name: `Category ${item._id}`,
+    name: getTriageLabel(item._id),
     value: item.count
   })) || [];
 
@@ -117,8 +130,8 @@ export default function AdminDashboard() {
           <div className="bg-white rounded-xl shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Waiting</p>
-                <p className="text-3xl font-bold text-yellow-600">{stats?.waiting || 0}</p>
+                <p className="text-sm text-gray-600 mb-1">Registered</p>
+                <p className="text-3xl font-bold text-yellow-600">{stats?.registered || 0}</p>
               </div>
               <Clock className="text-yellow-600" size={40} />
             </div>
@@ -141,6 +154,35 @@ export default function AdminDashboard() {
                 <p className="text-3xl font-bold text-green-600">{stats?.discharged || 0}</p>
               </div>
               <TrendingUp className="text-green-600" size={40} />
+            </div>
+          </div>
+        </div>
+
+        {/* Performance Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white rounded-xl shadow p-6">
+            <p className="text-xs font-semibold text-purple-600 uppercase tracking-wide mb-1">Avg Triage Time</p>
+            <p className="text-3xl font-bold text-purple-700">{formatMetricDuration(stats?.averageTriageTime)}</p>
+            <p className="text-xs text-gray-400 mt-1">Check-in → Triage complete</p>
+          </div>
+          <div className="bg-white rounded-xl shadow p-6">
+            <p className="text-xs font-semibold text-orange-600 uppercase tracking-wide mb-1">Avg Wait Time</p>
+            <p className="text-3xl font-bold text-orange-600">{formatMetricDuration(stats?.averageWaitingTime)}</p>
+            <p className="text-xs text-gray-400 mt-1">Triage complete → Doctor</p>
+          </div>
+          <div className="bg-white rounded-xl shadow p-6">
+            <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-1">Avg Consultation</p>
+            <p className="text-3xl font-bold text-blue-700">{formatMetricDuration(stats?.averageConsultationTime)}</p>
+            <p className="text-xs text-gray-400 mt-1">Doctor start → end</p>
+          </div>
+          <div className="bg-white rounded-xl shadow p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-red-600 uppercase tracking-wide mb-1">ED Congestion</p>
+                <p className="text-3xl font-bold text-red-600">{stats?.edCongestion ?? 0}</p>
+                <p className="text-xs text-gray-400 mt-1">Patients not discharged</p>
+              </div>
+              <AlertCircle className="text-red-300" size={36} />
             </div>
           </div>
         </div>
@@ -174,7 +216,8 @@ export default function AdminDashboard() {
             <h2 className="text-lg font-semibold text-gray-800 mb-4">Patient Status Overview</h2>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={[
-                { name: 'Waiting', count: stats?.waiting || 0 },
+                { name: 'Registered', count: stats?.registered || 0 },
+                { name: 'Triaged', count: stats?.triaged || 0 },
                 { name: 'In Treatment', count: stats?.inTreatment || 0 },
                 { name: 'Discharged', count: stats?.discharged || 0 }
               ]}>
@@ -200,8 +243,11 @@ export default function AdminDashboard() {
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Patient ID</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Age</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">IC Number</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Triage</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Location</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Diagnosis</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Disposition</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Arrival Time</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
@@ -212,11 +258,26 @@ export default function AdminDashboard() {
                   <tr key={patient._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 text-sm font-medium text-gray-900">{patient.patientId}</td>
                     <td className="px-6 py-4 text-sm text-gray-900">{patient.name}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{patient.age}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{patient.icNumber || '—'}</td>
                     <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getTriageColor(patient.triageCategory)}`}>
-                        Cat {patient.triageCategory}
-                      </span>
+                      {patient.triageCategory ? (
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getTriageColor(patient.triageCategory)}`}>
+                          {getTriageLabel(patient.triageCategory)}
+                        </span>
+                      ) : (
+                        <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">
+                          Pending
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {patient.assignedLocation || '—'}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {patient.treatment?.provisionalDiagnosis || '—'}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {patient.treatment?.disposition || '—'}
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(patient.status)}`}>
@@ -232,7 +293,9 @@ export default function AdminDashboard() {
                         onChange={(e) => handleStatusUpdate(patient._id, e.target.value)}
                         className="text-sm border border-gray-300 rounded px-2 py-1"
                       >
-                        <option value="Waiting">Waiting</option>
+                        <option value="Registered">Registered</option>
+                        <option value="Vitals Taken">Vitals Taken</option>
+                        <option value="Triaged">Triaged</option>
                         <option value="In Treatment">In Treatment</option>
                         <option value="Discharged">Discharged</option>
                       </select>

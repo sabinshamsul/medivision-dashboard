@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { getPatients, updatePatient } from '../services/api';
-import { Stethoscope, User, Clock, AlertCircle, CheckCircle } from 'lucide-react';
+import { Stethoscope, User, Clock, AlertCircle, CheckCircle, Activity, MapPin } from 'lucide-react';
+import VitalsFormModal from './VitalsFormModal';
+import TreatmentFormModal from './TreatmentFormModal';
 
 export default function ClinicianDashboard() {
   const [patients, setPatients] = useState([]);
-  const [selectedPatient, setSelectedPatient] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('waiting');
+  const [activeTab, setActiveTab] = useState('registered');
+  const [vitalsModalPatient, setVitalsModalPatient] = useState(null);
+  const [treatmentModalPatient, setTreatmentModalPatient] = useState(null);
 
   useEffect(() => {
     const runFetchPatients = async () => {
@@ -18,7 +21,7 @@ export default function ClinicianDashboard() {
     };
 
     runFetchPatients();
-    const interval = setInterval(runFetchPatients, 30000); // Refresh every 30 seconds
+    const interval = setInterval(runFetchPatients, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -37,72 +40,45 @@ export default function ClinicianDashboard() {
     try {
       await updatePatient(patientId, { status });
       fetchPatients();
-      if (selectedPatient && selectedPatient._id === patientId) {
-        setSelectedPatient({ ...selectedPatient, status });
-      }
     } catch (error) {
       console.error('Error updating patient:', error);
     }
   };
 
-  const handleAssignDoctor = async (patientId) => {
-    const storedUser = localStorage.getItem('user');
-    if (!storedUser) {
-      console.error('No user information found in localStorage.');
-      return;
-    }
-
-    let user;
+  const handleStartTreatment = async (patient) => {
+    setTreatmentModalPatient(patient);
     try {
-      user = JSON.parse(storedUser);
-    } catch (parseError) {
-      console.error('Failed to parse user information from localStorage:', parseError);
-      return;
-    }
-
-    if (!user || typeof user.name !== 'string' || user.name.trim() === '') {
-      console.error('Invalid user information in localStorage: missing or invalid "name" property.');
-      return;
-    }
-
-    try {
-      await updatePatient(patientId, { 
-        assignedDoctor: user.name,
-        status: 'In Treatment'
-      });
-      fetchPatients();
+      await updatePatient(patient._id, { status: 'In Treatment' });
+      await fetchPatients();
     } catch (error) {
-      console.error('Error assigning doctor:', error);
+      console.error('Error starting treatment:', error);
     }
   };
 
   const getTriageColor = (category) => {
-    const colors = {
-      1: 'bg-red-500',
-      2: 'bg-orange-500',
-      3: 'bg-yellow-500',
-      4: 'bg-green-500',
-      5: 'bg-blue-500'
-    };
-    return colors[category] || colors[3];
+    const colors = { 1: 'bg-red-500', 2: 'bg-yellow-500', 3: 'bg-green-500' };
+    return colors[category] || 'bg-gray-400';
   };
 
   const getTriageLabel = (category) => {
     const labels = {
-      1: 'Critical - Immediate',
-      2: 'Emergency - 10 mins',
-      3: 'Urgent - 30 mins',
-      4: 'Semi-urgent - 60 mins',
-      5: 'Non-urgent - 120 mins'
+      1: 'Cat 1 — Critical (Red)',
+      2: 'Cat 2 — Semi-Critical (Yellow)',
+      3: 'Cat 3 — Non-Critical (Green)'
     };
-    return labels[category] || 'Unknown';
+    return labels[category] || 'Not triaged';
   };
 
   const filteredPatients = patients.filter(p => {
-    if (activeTab === 'waiting') return p.status === 'Waiting';
+    if (activeTab === 'registered') return p.status === 'Registered';
+    if (activeTab === 'triaged') return p.status === 'Triaged' || p.status === 'Vitals Taken';
     if (activeTab === 'treatment') return p.status === 'In Treatment';
     return true;
   });
+
+  const registeredCount = patients.filter(p => p.status === 'Registered').length;
+  const triagedCount = patients.filter(p => p.status === 'Triaged' || p.status === 'Vitals Taken').length;
+  const inTreatmentCount = patients.filter(p => p.status === 'In Treatment').length;
 
   if (loading) {
     return (
@@ -126,14 +102,14 @@ export default function ClinicianDashboard() {
               <div>
                 <h1 className="text-2xl font-bold text-gray-800">Clinician Dashboard</h1>
                 <p className="text-sm text-gray-600">
-                  Dr. {(() => {
+                  {(() => {
                     const storedUser = localStorage.getItem('user');
                     if (!storedUser) return '';
                     try {
                       const parsedUser = JSON.parse(storedUser);
-                      return parsedUser && parsedUser.name ? parsedUser.name : '';
+                      const displayName = parsedUser?.name || parsedUser?.username || '';
+                      return displayName.startsWith('Dr.') ? displayName : `Dr. ${displayName}`;
                     } catch (e) {
-                      console.error('Failed to parse user from localStorage:', e);
                       return '';
                     }
                   })()}
@@ -159,10 +135,20 @@ export default function ClinicianDashboard() {
           <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-xl shadow-lg p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-yellow-100 mb-1">Waiting Queue</p>
-                <p className="text-4xl font-bold">{patients.filter(p => p.status === 'Waiting').length}</p>
+                <p className="text-yellow-100 mb-1">Waiting for Vitals</p>
+                <p className="text-4xl font-bold">{registeredCount}</p>
               </div>
               <Clock size={48} className="opacity-80" />
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-purple-400 to-purple-500 rounded-xl shadow-lg p-6 text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-purple-100 mb-1">Triaged</p>
+                <p className="text-4xl font-bold">{triagedCount}</p>
+              </div>
+              <Activity size={48} className="opacity-80" />
             </div>
           </div>
 
@@ -170,19 +156,9 @@ export default function ClinicianDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-blue-100 mb-1">In Treatment</p>
-                <p className="text-4xl font-bold">{patients.filter(p => p.status === 'In Treatment').length}</p>
+                <p className="text-4xl font-bold">{inTreatmentCount}</p>
               </div>
               <User size={48} className="opacity-80" />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-green-400 to-green-500 rounded-xl shadow-lg p-6 text-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-green-100 mb-1">Discharged Today</p>
-                <p className="text-4xl font-bold">{patients.filter(p => p.status === 'Discharged').length}</p>
-              </div>
-              <CheckCircle size={48} className="opacity-80" />
             </div>
           </div>
         </div>
@@ -191,14 +167,24 @@ export default function ClinicianDashboard() {
         <div className="bg-white rounded-xl shadow mb-6">
           <div className="flex border-b">
             <button
-              onClick={() => setActiveTab('waiting')}
+              onClick={() => setActiveTab('registered')}
               className={`flex-1 px-6 py-4 text-sm font-medium ${
-                activeTab === 'waiting'
+                activeTab === 'registered'
                   ? 'text-blue-600 border-b-2 border-blue-600'
                   : 'text-gray-600 hover:text-gray-800'
               }`}
             >
-              Waiting Queue ({patients.filter(p => p.status === 'Waiting').length})
+              Waiting for Vitals ({registeredCount})
+            </button>
+            <button
+              onClick={() => setActiveTab('triaged')}
+              className={`flex-1 px-6 py-4 text-sm font-medium ${
+                activeTab === 'triaged'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              Triaged ({triagedCount})
             </button>
             <button
               onClick={() => setActiveTab('treatment')}
@@ -208,7 +194,7 @@ export default function ClinicianDashboard() {
                   : 'text-gray-600 hover:text-gray-800'
               }`}
             >
-              In Treatment ({patients.filter(p => p.status === 'In Treatment').length})
+              In Treatment ({inTreatmentCount})
             </button>
           </div>
         </div>
@@ -218,32 +204,48 @@ export default function ClinicianDashboard() {
           {filteredPatients.length === 0 ? (
             <div className="col-span-2 bg-white rounded-xl shadow p-12 text-center">
               <AlertCircle className="mx-auto text-gray-400 mb-4" size={48} />
-              <p className="text-gray-600">No patients in {activeTab === 'waiting' ? 'queue' : 'treatment'}</p>
+              <p className="text-gray-600">
+                No patients in {
+                  activeTab === 'registered' ? 'waiting queue' :
+                  activeTab === 'triaged' ? 'triaged queue' :
+                  'treatment'
+                }
+              </p>
             </div>
           ) : (
             filteredPatients.map((patient) => (
               <div key={patient._id} className="bg-white rounded-xl shadow hover:shadow-lg transition">
                 <div className="p-6">
+                  {/* Header row */}
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <h3 className="text-lg font-bold text-gray-800">{patient.name}</h3>
                       <p className="text-sm text-gray-600">ID: {patient.patientId}</p>
+                      {patient.icNumber && (
+                        <p className="text-sm text-gray-500">IC: {patient.icNumber}</p>
+                      )}
                     </div>
-                    <div className={`${getTriageColor(patient.triageCategory)} text-white px-3 py-1 rounded-full text-xs font-bold`}>
-                      Category {patient.triageCategory}
+                    <div className="flex items-center gap-2">
+                      {patient.queueNumber && (
+                        <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-bold">
+                          Q{patient.queueNumber}
+                        </span>
+                      )}
+                      {patient.triageCategory && (
+                        <span className={`${getTriageColor(patient.triageCategory)} text-white px-3 py-1 rounded-full text-xs font-bold`}>
+                          Cat {patient.triageCategory}
+                        </span>
+                      )}
                     </div>
                   </div>
 
+                  {/* Info row */}
                   <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
                     <div>
-                      <span className="text-gray-600">Age:</span>
-                      <span className="ml-2 font-medium">{patient.age} years</span>
+                      <span className="text-gray-600">Phone:</span>
+                      <span className="ml-2 font-medium">{patient.contactNumber}</span>
                     </div>
                     <div>
-                      <span className="text-gray-600">Gender:</span>
-                      <span className="ml-2 font-medium">{patient.gender}</span>
-                    </div>
-                    <div className="col-span-2">
                       <span className="text-gray-600">Arrival:</span>
                       <span className="ml-2 font-medium">
                         {new Date(patient.arrivalTime).toLocaleTimeString()}
@@ -251,44 +253,91 @@ export default function ClinicianDashboard() {
                     </div>
                   </div>
 
+                  {/* Chief complaint */}
                   <div className="mb-4">
                     <p className="text-xs text-gray-600 mb-1">Chief Complaint:</p>
                     <p className="text-sm text-gray-800 bg-gray-50 p-3 rounded">{patient.chiefComplaint}</p>
                   </div>
 
-                  {patient.vitalSigns && (
+                  {/* Triage info for triaged patients */}
+                  {patient.triageCategory && (
+                    <div className="mb-4">
+                      <p className="text-xs text-gray-600 mb-1">Triage:</p>
+                      <p className="text-sm font-medium">{getTriageLabel(patient.triageCategory)}</p>
+                      {patient.nurseOverride && (
+                        <p className="text-xs text-orange-600 mt-1">
+                          Nurse override — {patient.nurseOverrideReason}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Location assignment */}
+                  {patient.assignedLocation && (
+                    <div className="mb-4">
+                      <p className="text-xs text-gray-600 mb-1">Assigned Location:</p>
+                      <div className="flex items-center gap-2">
+                        <MapPin size={14} className="text-blue-600" />
+                        <p className="text-sm font-medium text-blue-800">{patient.assignedLocation}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Vital signs display */}
+                  {patient.vitalSigns && patient.vitalSigns.heartRate && (
                     <div className="mb-4 grid grid-cols-2 gap-2 text-xs">
-                      {patient.vitalSigns.bloodPressure && (
-                        <div className="bg-blue-50 p-2 rounded">
-                          <span className="text-gray-600">BP:</span>
-                          <span className="ml-1 font-medium">{patient.vitalSigns.bloodPressure}</span>
+                      {patient.vitalSigns.spO2 != null && (
+                        <div className="bg-green-50 p-2 rounded">
+                          <span className="text-gray-600">SpO2:</span>
+                          <span className="ml-1 font-medium">{patient.vitalSigns.spO2}%</span>
                         </div>
                       )}
-                      {patient.vitalSigns.heartRate && (
+                      {patient.vitalSigns.heartRate != null && (
                         <div className="bg-red-50 p-2 rounded">
                           <span className="text-gray-600">HR:</span>
                           <span className="ml-1 font-medium">{patient.vitalSigns.heartRate} bpm</span>
                         </div>
                       )}
-                      {patient.vitalSigns.temperature && (
+                      {patient.vitalSigns.systolicBP != null && (
+                        <div className="bg-blue-50 p-2 rounded">
+                          <span className="text-gray-600">BP:</span>
+                          <span className="ml-1 font-medium">{patient.vitalSigns.systolicBP}/{patient.vitalSigns.diastolicBP}</span>
+                        </div>
+                      )}
+                      {patient.vitalSigns.temperature != null && (
                         <div className="bg-orange-50 p-2 rounded">
                           <span className="text-gray-600">Temp:</span>
                           <span className="ml-1 font-medium">{patient.vitalSigns.temperature}°C</span>
                         </div>
                       )}
-                      {patient.vitalSigns.oxygenSaturation && (
-                        <div className="bg-green-50 p-2 rounded">
-                          <span className="text-gray-600">SpO2:</span>
-                          <span className="ml-1 font-medium">{patient.vitalSigns.oxygenSaturation}%</span>
+                      {patient.vitalSigns.respiratoryRate != null && (
+                        <div className="bg-purple-50 p-2 rounded">
+                          <span className="text-gray-600">RR:</span>
+                          <span className="ml-1 font-medium">{patient.vitalSigns.respiratoryRate}/min</span>
+                        </div>
+                      )}
+                      {patient.vitalSigns.gcs != null && (
+                        <div className="bg-yellow-50 p-2 rounded">
+                          <span className="text-gray-600">GCS:</span>
+                          <span className="ml-1 font-medium">{patient.vitalSigns.gcs}/15</span>
                         </div>
                       )}
                     </div>
                   )}
 
+                  {/* Action buttons */}
                   <div className="flex gap-2">
-                    {patient.status === 'Waiting' && (
+                    {patient.status === 'Registered' && (
                       <button
-                        onClick={() => handleAssignDoctor(patient._id)}
+                        onClick={() => setVitalsModalPatient(patient)}
+                        className="flex-1 bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition text-sm font-medium"
+                      >
+                        Take Vitals
+                      </button>
+                    )}
+                    {patient.status === 'Triaged' && (
+                      <button
+                        onClick={() => handleStartTreatment(patient)}
                         className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium"
                       >
                         Start Treatment
@@ -296,10 +345,10 @@ export default function ClinicianDashboard() {
                     )}
                     {patient.status === 'In Treatment' && (
                       <button
-                        onClick={() => handleUpdateStatus(patient._id, 'Discharged')}
+                        onClick={() => setTreatmentModalPatient(patient)}
                         className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition text-sm font-medium"
                       >
-                        Discharge Patient
+                        Complete Treatment
                       </button>
                     )}
                   </div>
@@ -309,6 +358,30 @@ export default function ClinicianDashboard() {
           )}
         </div>
       </div>
+
+      {/* Vitals Modal */}
+      {vitalsModalPatient && (
+        <VitalsFormModal
+          patient={vitalsModalPatient}
+          onClose={() => setVitalsModalPatient(null)}
+          onVitalsSubmitted={() => {
+            setVitalsModalPatient(null);
+            fetchPatients();
+          }}
+        />
+      )}
+
+      {/* Treatment Modal */}
+      {treatmentModalPatient && (
+        <TreatmentFormModal
+          patient={treatmentModalPatient}
+          onClose={() => setTreatmentModalPatient(null)}
+          onTreatmentCompleted={() => {
+            setTreatmentModalPatient(null);
+            fetchPatients();
+          }}
+        />
+      )}
     </div>
   );
 }

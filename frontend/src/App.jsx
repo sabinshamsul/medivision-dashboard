@@ -6,6 +6,7 @@ import LoginAsAdmin from './components/LoginAsAdmin';
 import LoginAsStaff from './components/LoginAsStaff';
 import LoginAsPatient from './components/LoginAsPatient';
 import PatientRegistration from './components/PatientRegistration';
+import PatientWaitingScreen from './components/PatientWaitingScreen';
 import AdminDashboard from './components/AdminDashboard';
 import AdminPage from './components/AdminPage';
 import ClinicianDashboard from './components/ClinicianDashboard';
@@ -52,9 +53,14 @@ function App() {
         <Route path="/login-staff" element={<LoginAsStaff />} />
         <Route path="/login-patient" element={<LoginAsPatient />} />
         
-        <Route 
-          path="/register" 
-          element={<PatientRegistration />} 
+        <Route
+          path="/register"
+          element={<PatientRegistration />}
+        />
+
+        <Route
+          path="/waiting/:id"
+          element={<PatientWaitingScreen />}
         />
 
         <Route path="/admin-page" element={<AdminPage />} />

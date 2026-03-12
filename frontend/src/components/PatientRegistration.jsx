@@ -7,25 +7,25 @@ import mediVisionLogo from '../assets/MediVision-Logo.jpeg';
 export default function PatientRegistration() {
   const navigate = useNavigate();
   const COUNTRY_CODES = [
-    { code: '+60', label: '+60 (Malaysia)' },
-    { code: '+65', label: '+65 (Singapore)' },
-    { code: '+62', label: '+62 (Indonesia)' },
-    { code: '+66', label: '+66 (Thailand)' },
-    { code: '+63', label: '+63 (Philippines)' },
-    { code: '+673', label: '+673 (Brunei)' },
-    { code: '+95', label: '+95 (Myanmar)' },
-    { code: '+84', label: '+84 (Vietnam)' },
-    { code: '+855', label: '+855 (Cambodia)' },
-    { code: '+856', label: '+856 (Laos)' },
-    { code: '+91', label: '+91 (India)' },
-    { code: '+86', label: '+86 (China)' },
-    { code: '+81', label: '+81 (Japan)' },
-    { code: '+82', label: '+82 (South Korea)' },
-    { code: '+61', label: '+61 (Australia)' },
-    { code: '+44', label: '+44 (United Kingdom)' },
-    { code: '+1', label: '+1 (USA / Canada)' },
-    { code: '+971', label: '+971 (UAE)' },
-    { code: '+966', label: '+966 (Saudi Arabia)' },
+    { code: '+60', label: '🇲🇾 +60 (Malaysia)' },
+    { code: '+65', label: '🇸🇬 +65 (Singapore)' },
+    { code: '+62', label: '🇮🇩 +62 (Indonesia)' },
+    { code: '+66', label: '🇹🇭 +66 (Thailand)' },
+    { code: '+63', label: '🇵🇭 +63 (Philippines)' },
+    { code: '+673', label: '🇧🇳 +673 (Brunei)' },
+    { code: '+95', label: '🇲🇲 +95 (Myanmar)' },
+    { code: '+84', label: '🇻🇳 +84 (Vietnam)' },
+    { code: '+855', label: '🇰🇭 +855 (Cambodia)' },
+    { code: '+856', label: '🇱🇦 +856 (Laos)' },
+    { code: '+91', label: '🇮🇳 +91 (India)' },
+    { code: '+86', label: '🇨🇳 +86 (China)' },
+    { code: '+81', label: '🇯🇵 +81 (Japan)' },
+    { code: '+82', label: '🇰🇷 +82 (South Korea)' },
+    { code: '+61', label: '🇦🇺 +61 (Australia)' },
+    { code: '+44', label: '🇬🇧 +44 (United Kingdom)' },
+    { code: '+1', label: '🇺🇸 +1 (USA / Canada)' },
+    { code: '+971', label: '🇦🇪 +971 (UAE)' },
+    { code: '+966', label: '🇸🇦 +966 (Saudi Arabia)' },
   ];
 
   const today = new Date().toISOString().split('T')[0];
@@ -128,43 +128,42 @@ export default function PatientRegistration() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Date of Birth *</label>
-                <input
-                  type="date"
-                  name="dateOfBirth"
-                  required
-                  max={today}
-                  value={formData.dateOfBirth}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-[#1C3D6E] focus:bg-white transition"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Gender *</label>
-                <select
-                  name="gender"
-                  required
-                  value={formData.gender}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-[#1C3D6E] focus:bg-white transition"
-                >
-                  <option value="">Select gender</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                </select>
-              </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Date of Birth *</label>
+              <input
+                type="date"
+                name="dateOfBirth"
+                required
+                max={today}
+                value={formData.dateOfBirth}
+                onChange={handleChange}
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-[#1C3D6E] focus:bg-white transition"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Sex *</label>
+              <select
+                name="gender"
+                required
+                value={formData.gender}
+                onChange={handleChange}
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-[#1C3D6E] focus:bg-white transition"
+              >
+                <option value="">Select sex</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Phone Number *</label>
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2">
                 <select
                   name="countryCode"
                   value={formData.countryCode}
                   onChange={handleChange}
-                  className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-[#1C3D6E] focus:bg-white transition"
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-[#1C3D6E] focus:bg-white transition"
                 >
                   {COUNTRY_CODES.map(({ code, label }) => (
                     <option key={code} value={code}>{label}</option>
@@ -176,7 +175,7 @@ export default function PatientRegistration() {
                   required
                   value={formData.phoneNumber}
                   onChange={handleChange}
-                  className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-[#1C3D6E] focus:bg-white transition"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-[#1C3D6E] focus:bg-white transition"
                   placeholder="e.g. 012-3456789"
                 />
               </div>

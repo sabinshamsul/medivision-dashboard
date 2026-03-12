@@ -144,10 +144,9 @@ router.post('/', async (req, res) => {
       queueNumber,
       name: req.body.name,
       icNumber: req.body.icNumber,
-      age: req.body.age,
+      dateOfBirth: req.body.dateOfBirth,
       gender: req.body.gender,
       contactNumber: req.body.contactNumber,
-      address: req.body.address,
       chiefComplaint: req.body.chiefComplaint,
       status: 'Registered'
     });

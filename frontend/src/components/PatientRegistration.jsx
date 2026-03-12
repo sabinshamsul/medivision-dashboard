@@ -5,13 +5,37 @@ import { UserPlus, CheckCircle, AlertCircle } from 'lucide-react';
 
 export default function PatientRegistration() {
   const navigate = useNavigate();
+  const COUNTRY_CODES = [
+    { code: '+60', label: '+60 (Malaysia)' },
+    { code: '+65', label: '+65 (Singapore)' },
+    { code: '+62', label: '+62 (Indonesia)' },
+    { code: '+66', label: '+66 (Thailand)' },
+    { code: '+63', label: '+63 (Philippines)' },
+    { code: '+673', label: '+673 (Brunei)' },
+    { code: '+95', label: '+95 (Myanmar)' },
+    { code: '+84', label: '+84 (Vietnam)' },
+    { code: '+855', label: '+855 (Cambodia)' },
+    { code: '+856', label: '+856 (Laos)' },
+    { code: '+91', label: '+91 (India)' },
+    { code: '+86', label: '+86 (China)' },
+    { code: '+81', label: '+81 (Japan)' },
+    { code: '+82', label: '+82 (South Korea)' },
+    { code: '+61', label: '+61 (Australia)' },
+    { code: '+44', label: '+44 (United Kingdom)' },
+    { code: '+1', label: '+1 (USA / Canada)' },
+    { code: '+971', label: '+971 (UAE)' },
+    { code: '+966', label: '+966 (Saudi Arabia)' },
+  ];
+
+  const today = new Date().toISOString().split('T')[0];
+
   const [formData, setFormData] = useState({
     name: '',
     icNumber: '',
-    age: '',
+    dateOfBirth: '',
     gender: '',
-    contactNumber: '',
-    address: '',
+    countryCode: '+60',
+    phoneNumber: '',
     chiefComplaint: ''
   });
 
@@ -29,7 +53,11 @@ export default function PatientRegistration() {
     setLoading(true);
 
     try {
-      const payload = { ...formData, age: Number(formData.age) };
+      const { countryCode, phoneNumber, ...rest } = formData;
+      const payload = {
+        ...rest,
+        contactNumber: `${countryCode} ${phoneNumber}`,
+      };
       const response = await createPatient(payload);
       const newPatient = response.data;
       // Navigate to waiting screen with patient data
@@ -88,7 +116,7 @@ export default function PatientRegistration() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                IC Number *
+                IC Number / Passport Number *
               </label>
               <input
                 type="text"
@@ -97,25 +125,23 @@ export default function PatientRegistration() {
                 value={formData.icNumber}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="e.g. 990101-01-1234"
+                placeholder="e.g. 990101-01-1234 or Passport No."
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Age *
+                  Date of Birth *
                 </label>
                 <input
-                  type="number"
-                  name="age"
+                  type="date"
+                  name="dateOfBirth"
                   required
-                  min="0"
-                  max="150"
-                  value={formData.age}
+                  max={today}
+                  value={formData.dateOfBirth}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g. 30"
                 />
               </div>
 
@@ -141,30 +167,27 @@ export default function PatientRegistration() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Phone Number *
               </label>
-              <input
-                type="tel"
-                name="contactNumber"
-                required
-                value={formData.contactNumber}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="e.g. 012-3456789"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Address *
-              </label>
-              <input
-                type="text"
-                name="address"
-                required
-                value={formData.address}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="e.g. 123, Jalan Ampang, Kuala Lumpur"
-              />
+              <div className="flex gap-2">
+                <select
+                  name="countryCode"
+                  value={formData.countryCode}
+                  onChange={handleChange}
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                >
+                  {COUNTRY_CODES.map(({ code, label }) => (
+                    <option key={code} value={code}>{label}</option>
+                  ))}
+                </select>
+                <input
+                  type="tel"
+                  name="phoneNumber"
+                  required
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g. 012-3456789"
+                />
+              </div>
             </div>
 
             <div>

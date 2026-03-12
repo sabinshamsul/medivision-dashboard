@@ -16,6 +16,16 @@ const JOURNEY_STEPS = [
   { label: 'Treatment / Discharge', minStatus: 'Discharged' }
 ];
 
+function computeAge(dob) {
+  if (!dob) return '—';
+  const birth = new Date(dob);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+  return age;
+}
+
 function getStatusIndex(status) {
   const idx = STATUS_ORDER.indexOf(status);
   return idx === -1 ? 0 : idx;
@@ -418,7 +428,7 @@ export default function PatientWaitingScreen() {
               <h3 className="font-semibold text-blue-900 mb-2">Next Steps</h3>
               <p className="text-sm text-blue-800">
                 {patient.status === 'Registered' && (
-                  'A Doctor Will See your Patient Shortly. Please Remain Calm. If You Experience any Worsening Symptoms, please Notify the Staff Immediately.'
+                  'A doctor will see you shortly. Please remain calm. If you experience any worsening symptoms, please notify the staff immediately.'
                 )}
                 {patient.status === 'Vitals Taken' && (
                   'Your vitals have been recorded. Please wait while the nurse completes your triage assessment.'
@@ -434,7 +444,7 @@ export default function PatientWaitingScreen() {
                     ? 'Your treatment is complete. You will be admitted for further care. Please follow the staff\'s instructions for your admission.'
                     : patient.treatment?.disposition === 'Referral'
                     ? 'Your treatment is complete. You have been referred for specialist consultation. Please check with the front desk for your referral details.'
-                    : 'You have been discharged. Thank you for visiting MediVision. Please follow your discharge instructions and take care.'
+                    : 'You have been discharged. Thank you for using MediVision. Please follow your discharge instructions and take care.'
                 )}
               </p>
             </div>
@@ -537,7 +547,7 @@ export default function PatientWaitingScreen() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Age / Gender</span>
-                  <span className="font-medium text-gray-800">{patient.age} / {patient.gender}</span>
+                  <span className="font-medium text-gray-800">{computeAge(patient.dateOfBirth)} / {patient.gender}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Contact</span>

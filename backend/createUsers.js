@@ -21,7 +21,7 @@ mongoose.connect(process.env.MONGO_URI)
         username: 'doctor',
         password: await bcrypt.hash('doctor123', 10),
         role: 'clinician',
-        name: 'Dr. Sarah Johnson',
+        name: 'Khairul Aming',
         email: 'doctor@medivision.com'
       },
       {

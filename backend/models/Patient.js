@@ -17,8 +17,8 @@ const patientSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  age: {
-    type: Number,
+  dateOfBirth: {
+    type: Date,
     required: true
   },
   gender: {
@@ -27,10 +27,6 @@ const patientSchema = new mongoose.Schema({
     required: true
   },
   contactNumber: {
-    type: String,
-    required: true
-  },
-  address: {
     type: String,
     required: true
   },

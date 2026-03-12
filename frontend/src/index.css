@@ -55,6 +55,7 @@ code {
 .dark-mode .text-gray-400     { color: #6b7280 !important; }
 
 /* ── Colored text on dark backgrounds ── */
+.dark-mode .text-blue-900     { color: #bfdbfe !important; }
 .dark-mode .text-blue-700     { color: #93c5fd !important; }
 .dark-mode .text-blue-800     { color: #93c5fd !important; }
 .dark-mode .text-red-800      { color: #fca5a5 !important; }

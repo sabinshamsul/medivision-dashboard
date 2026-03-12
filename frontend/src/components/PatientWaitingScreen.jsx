@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { getPatient, getQueuePosition } from '../services/api';
+import mediVisionLogo from '../assets/MediVision-Logo.jpeg';
 import {
   Clock, Users, Activity, CheckCircle, MapPin, Heart,
-  AlertCircle, Shield, ChevronLeft
+  AlertCircle, Moon, Sun
 } from 'lucide-react';
 
 const STATUS_ORDER = ['Registered', 'Vitals Taken', 'Triaged', 'In Treatment', 'Discharged'];
@@ -13,7 +14,7 @@ const JOURNEY_STEPS = [
   { label: 'Triage Assessment', minStatus: 'Vitals Taken' },
   { label: 'Waiting for Doctor', minStatus: 'Triaged' },
   { label: 'Medical Examination', minStatus: 'In Treatment' },
-  { label: 'Treatment / Discharge', minStatus: 'Discharged' }
+  { label: 'Disposition', minStatus: 'Discharged' }
 ];
 
 function computeAge(dob) {
@@ -148,24 +149,32 @@ function getPriorityStyle(category) {
   return styles[category] || 'bg-gray-100 text-gray-600';
 }
 
-function getStatusBadgeStyle(status) {
+function getStatusBadgeStyle(status, disposition) {
+  if (status === 'Discharged') {
+    if (disposition === 'Admit')    return 'bg-blue-100 text-blue-700';
+    if (disposition === 'Referral') return 'bg-orange-100 text-orange-700';
+    return 'bg-green-100 text-green-700'; // Discharge / default
+  }
   const styles = {
-    'Registered': 'bg-purple-100 text-purple-700',
-    'Vitals Taken': 'bg-indigo-100 text-indigo-700',
-    'Triaged': 'bg-orange-100 text-orange-700',
-    'In Treatment': 'bg-blue-100 text-blue-700',
-    'Discharged': 'bg-green-100 text-green-700'
+    'Registered':  'bg-purple-100 text-purple-700',
+    'Vitals Taken':'bg-indigo-100 text-indigo-700',
+    'Triaged':     'bg-orange-100 text-orange-700',
+    'In Treatment':'bg-blue-100 text-blue-700',
   };
   return styles[status] || 'bg-gray-100 text-gray-600';
 }
 
-function getStatusLabel(status) {
+function getStatusLabel(status, disposition) {
+  if (status === 'Discharged') {
+    if (disposition === 'Admit')    return 'Admitted';
+    if (disposition === 'Referral') return 'Referred';
+    return 'Discharged';
+  }
   const labels = {
-    'Registered': 'Registered',
-    'Vitals Taken': 'Vitals Taken',
-    'Triaged': 'Triaged',
-    'In Treatment': 'In Treatment',
-    'Discharged': 'Discharged'
+    'Registered':  'Registered',
+    'Vitals Taken':'Vitals Taken',
+    'Triaged':     'Triaged',
+    'In Treatment':'In Treatment',
   };
   return labels[status] || status;
 }
@@ -177,6 +186,11 @@ export default function PatientWaitingScreen() {
   const [patient, setPatient] = useState(location.state?.patient || null);
   const [queueInfo, setQueueInfo] = useState(null);
   const [loading, setLoading] = useState(!patient);
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('medivision-dark') === 'true');
+
+  useEffect(() => {
+    localStorage.setItem('medivision-dark', darkMode);
+  }, [darkMode]);
 
   // Fetch patient data if not passed via navigation state
   useEffect(() => {
@@ -227,10 +241,10 @@ export default function PatientWaitingScreen() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className={`min-h-screen flex items-center justify-center ${darkMode ? 'dark-mode bg-gray-900' : 'bg-[#1C3D6E]'}`}>
         <div className="text-center">
-          <Activity className="animate-spin mx-auto mb-4 text-blue-600" size={48} />
-          <p className="text-gray-600">Loading your information...</p>
+          <Activity className="animate-spin mx-auto mb-4 text-blue-400" size={48} />
+          <p className="text-white/80">Loading your information...</p>
         </div>
       </div>
     );
@@ -238,10 +252,10 @@ export default function PatientWaitingScreen() {
 
   if (!patient) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className={`min-h-screen flex items-center justify-center ${darkMode ? 'dark-mode bg-gray-900' : 'bg-[#1C3D6E]'}`}>
         <div className="text-center">
-          <AlertCircle className="mx-auto mb-4 text-gray-400" size={48} />
-          <p className="text-gray-600">Registration not found. Please register at the check-in counter.</p>
+          <AlertCircle className="mx-auto mb-4 text-white/50" size={48} />
+          <p className="text-white/80">Registration not found. Please register at the check-in counter.</p>
         </div>
       </div>
     );
@@ -252,31 +266,40 @@ export default function PatientWaitingScreen() {
   const estimatedWait = getEstimatedWait(patient, queueInfo);
 
   return (
-    <div className="min-h-screen bg-[#1e3a5f]">
+    <div className={`min-h-screen ${darkMode ? 'dark-mode bg-gray-900' : 'bg-[#1C3D6E]'}`}>
       {/* Header */}
-      <header className="bg-[#1e3a5f] text-white px-6 py-4">
+      <header className="px-6 py-5">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
+          {/* Left — Dark mode toggle */}
+          <div className="w-32 flex items-start">
             <button
-              onClick={() => navigate(-1)}
-              className="flex items-center gap-1 text-white/80 hover:text-white text-sm transition"
+              onClick={() => setDarkMode(prev => !prev)}
+              title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              className="flex items-center justify-center bg-white/15 hover:bg-white/25 rounded-full w-9 h-9 text-white transition"
             >
-              <ChevronLeft size={18} />
-              Return Back
+              {darkMode ? <Sun size={16} /> : <Moon size={16} />}
             </button>
-            <div className="flex items-center gap-2">
-              <Shield className="text-white" size={28} />
-              <span className="text-xl font-bold tracking-wide">
-                MEDI<span className="text-red-400">VISION</span>
-              </span>
-            </div>
-            <span className="text-white/70 text-sm ml-4">Patient Portal</span>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <p className="text-sm text-white/70">Queue Number</p>
-              <p className="text-2xl font-bold">{patient.queueNumber || '—'}</p>
+
+          {/* Centre — Logo + title + live indicator */}
+          <div className="flex flex-col items-center gap-1">
+            <img src={mediVisionLogo} alt="MediVision Logo" className="w-16 h-16 rounded-2xl object-cover shadow-lg" />
+            <h1 className="text-xl font-bold text-white tracking-wide mt-1">Patient Visitation</h1>
+            <div className="flex items-center gap-2 text-white/80 text-sm mt-0.5">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+              </span>
+              <span>Live — updates automatically</span>
+              <span className="text-white/40 mx-1">·</span>
+              <span>Stay on for live updates</span>
             </div>
+          </div>
+
+          {/* Right — Queue Number */}
+          <div className="text-right w-32">
+            <p className="text-sm text-white/70">Queue Number</p>
+            <p className="text-2xl font-bold text-white">{patient.queueNumber || '—'}</p>
           </div>
         </div>
       </header>
@@ -287,6 +310,24 @@ export default function PatientWaitingScreen() {
 
           {/* LEFT COLUMN */}
           <div className="lg:col-span-3 space-y-6">
+            {/* Next Steps */}
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
+              <h3 className="font-semibold text-blue-900 mb-2">Next Steps</h3>
+              <p className="text-sm text-blue-800">
+                {patient.status === 'Registered' && 'A doctor will see you shortly. Please remain calm. If you experience any worsening symptoms, please notify the staff immediately.'}
+                {patient.status === 'Vitals Taken' && 'Your vitals have been recorded. Please wait while the nurse completes your triage assessment.'}
+                {patient.status === 'Triaged' && `Your triage assessment is complete. Please proceed to your assigned location: ${currentLocation}. A doctor will attend to you shortly.`}
+                {patient.status === 'In Treatment' && `You are currently being treated${patient.assignedDoctor ? ` by Dr. ${patient.assignedDoctor}` : ''}. Please follow your doctor's instructions.`}
+                {patient.status === 'Discharged' && (
+                  patient.treatment?.disposition === 'Admit'
+                    ? "Your treatment is complete. You will be admitted for further care. Please follow the staff's instructions for your admission."
+                    : patient.treatment?.disposition === 'Referral'
+                    ? 'Your treatment is complete. You have been referred for specialist consultation. Please check with the front desk for your referral details.'
+                    : 'You have been discharged. Thank you for using MediVision. Please follow your discharge instructions and take care.'
+                )}
+              </p>
+            </div>
+
             {/* Welcome + Status Card */}
             <div className="bg-white rounded-xl shadow-lg p-6">
               <h1 className="text-2xl font-bold text-gray-800 mb-1">
@@ -307,8 +348,8 @@ export default function PatientWaitingScreen() {
 
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600">Status:</span>
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusBadgeStyle(patient.status)}`}>
-                    {getStatusLabel(patient.status)}
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusBadgeStyle(patient.status, patient.treatment?.disposition)}`}>
+                    {getStatusLabel(patient.status, patient.treatment?.disposition)}
                   </span>
                 </div>
 
@@ -423,40 +464,6 @@ export default function PatientWaitingScreen() {
               </div>
             )}
 
-            {/* Next Steps */}
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
-              <h3 className="font-semibold text-blue-900 mb-2">Next Steps</h3>
-              <p className="text-sm text-blue-800">
-                {patient.status === 'Registered' && (
-                  'A doctor will see you shortly. Please remain calm. If you experience any worsening symptoms, please notify the staff immediately.'
-                )}
-                {patient.status === 'Vitals Taken' && (
-                  'Your vitals have been recorded. Please wait while the nurse completes your triage assessment.'
-                )}
-                {patient.status === 'Triaged' && (
-                  `Your triage assessment is complete. Please proceed to your assigned location: ${currentLocation}. A doctor will attend to you shortly.`
-                )}
-                {patient.status === 'In Treatment' && (
-                  `You are currently being treated${patient.assignedDoctor ? ` by Dr. ${patient.assignedDoctor}` : ''}. Please follow your doctor's instructions.`
-                )}
-                {patient.status === 'Discharged' && (
-                  patient.treatment?.disposition === 'Admit'
-                    ? 'Your treatment is complete. You will be admitted for further care. Please follow the staff\'s instructions for your admission.'
-                    : patient.treatment?.disposition === 'Referral'
-                    ? 'Your treatment is complete. You have been referred for specialist consultation. Please check with the front desk for your referral details.'
-                    : 'You have been discharged. Thank you for using MediVision. Please follow your discharge instructions and take care.'
-                )}
-              </p>
-            </div>
-
-            {/* Live indicator */}
-            <div className="flex items-center justify-center gap-2 text-gray-400 text-sm">
-              <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-              </span>
-              Live — updates automatically
-            </div>
           </div>
 
           {/* RIGHT COLUMN - Journey Timeline */}

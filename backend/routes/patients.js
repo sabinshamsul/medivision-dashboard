@@ -56,6 +56,26 @@ router.get('/stats/overview', async (req, res) => {
 
     const edCongestion = await Patient.countDocuments({ status: { $ne: 'Discharged' } });
 
+    // Active = not yet discharged AND no final disposition recorded.
+    // Waiting Area counts only Registered patients (pre-triage) + Cat 3 triaged patients.
+    const activeFilter = {
+      status: { $ne: 'Discharged' },
+      'treatment.disposition': { $nin: ['Discharge', 'Admit', 'Referral'] },
+    };
+    const resusOccupied   = await Patient.countDocuments({ triageCategory: 1, ...activeFilter });
+    const edBedOccupied   = await Patient.countDocuments({ triageCategory: 2, ...activeFilter });
+    const waitingOccupied = await Patient.countDocuments({
+      $or: [{ triageCategory: 3 }, { status: 'Registered' }],
+      ...activeFilter,
+    });
+
+    // Average Length of Stay: arrivalTime → treatment.treatmentEndTime (minutes)
+    const losAgg = await Patient.aggregate([
+      { $match: { 'treatment.treatmentEndTime': { $ne: null }, arrivalTime: { $ne: null } } },
+      { $project: { d: { $divide: [{ $subtract: ['$treatment.treatmentEndTime', '$arrivalTime'] }, 60000] } } },
+      { $group: { _id: null, avg: { $avg: '$d' } } }
+    ]);
+
     const round1 = (v) => v != null ? Math.round(v * 10) / 10 : null;
 
     res.json({
@@ -69,7 +89,11 @@ router.get('/stats/overview', async (req, res) => {
       averageTriageTime: round1(triageTimeAgg[0]?.avg),
       averageWaitingTime: round1(waitingTimeAgg[0]?.avg),
       averageConsultationTime: round1(consultTimeAgg[0]?.avg),
-      edCongestion
+      averageLOS: round1(losAgg[0]?.avg),
+      edCongestion,
+      resusOccupied,
+      edBedOccupied,
+      waitingOccupied,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

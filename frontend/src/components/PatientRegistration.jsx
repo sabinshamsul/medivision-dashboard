@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPatient } from '../services/api';
-import { UserPlus, CheckCircle, AlertCircle } from 'lucide-react';
+import { AlertCircle, Loader2 } from 'lucide-react';
+import mediVisionLogo from '../assets/MediVision-Logo.jpeg';
 
 export default function PatientRegistration() {
   const navigate = useNavigate();
@@ -70,70 +71,66 @@ export default function PatientRegistration() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-      <div className="w-full max-w-lg">
-        <div className="bg-white rounded-xl shadow-lg p-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-600 rounded-full">
-              <UserPlus className="text-white" size={24} />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">Emergency Check-In</h1>
-              <p className="text-sm text-gray-500">MediVision Patient Registration</p>
-            </div>
-          </div>
+    <div className="min-h-screen bg-[#1C3D6E]">
 
-          <p className="text-gray-600 text-sm mb-6 mt-4">
+      {/* ── Header — matches PatientWaitingScreen ── */}
+      <header className="px-6 py-5">
+        <div className="max-w-2xl mx-auto flex flex-col items-center gap-1">
+          <img src={mediVisionLogo} alt="MediVision Logo" className="w-16 h-16 rounded-2xl object-cover shadow-lg" />
+          <h1 className="text-xl font-bold text-white tracking-wide mt-1">Emergency Check-in</h1>
+          <p className="text-white/60 text-sm">MediVision · Patient Self-Registration</p>
+        </div>
+      </header>
+
+      {/* ── Form card ── */}
+      <div className="max-w-2xl mx-auto px-4 pb-12">
+        <div className="bg-white rounded-2xl shadow-xl p-8">
+
+          <p className="text-gray-500 text-sm mb-6">
             Please fill in your details below. You will receive a queue number after registration.
           </p>
 
           {error && (
             <div
-              className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center gap-2"
+              className="flex items-start gap-2.5 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 text-sm"
               role="alert"
               aria-live="polite"
             >
-              <AlertCircle size={18} />
-              {error}
+              <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
+              <span>{error}</span>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name *
-              </label>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Full Name *</label>
               <input
                 type="text"
                 name="name"
                 required
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-[#1C3D6E] focus:bg-white transition"
                 placeholder="e.g. Ahmad bin Ali"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                IC Number / Passport Number *
-              </label>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">IC Number / Passport Number *</label>
               <input
                 type="text"
                 name="icNumber"
                 required
                 value={formData.icNumber}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-[#1C3D6E] focus:bg-white transition"
                 placeholder="e.g. 990101-01-1234 or Passport No."
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Date of Birth *
-                </label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Date of Birth *</label>
                 <input
                   type="date"
                   name="dateOfBirth"
@@ -141,20 +138,17 @@ export default function PatientRegistration() {
                   max={today}
                   value={formData.dateOfBirth}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-[#1C3D6E] focus:bg-white transition"
                 />
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Gender *
-                </label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Gender *</label>
                 <select
                   name="gender"
                   required
                   value={formData.gender}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-[#1C3D6E] focus:bg-white transition"
                 >
                   <option value="">Select gender</option>
                   <option value="Male">Male</option>
@@ -164,15 +158,13 @@ export default function PatientRegistration() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Phone Number *
-              </label>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Phone Number *</label>
               <div className="flex gap-2">
                 <select
                   name="countryCode"
                   value={formData.countryCode}
                   onChange={handleChange}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-[#1C3D6E] focus:bg-white transition"
                 >
                   {COUNTRY_CODES.map(({ code, label }) => (
                     <option key={code} value={code}>{label}</option>
@@ -184,23 +176,21 @@ export default function PatientRegistration() {
                   required
                   value={formData.phoneNumber}
                   onChange={handleChange}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-[#1C3D6E] focus:bg-white transition"
                   placeholder="e.g. 012-3456789"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Chief Complaint *
-              </label>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Chief Complaint *</label>
               <textarea
                 name="chiefComplaint"
                 required
                 value={formData.chiefComplaint}
                 onChange={handleChange}
                 rows="3"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-[#1C3D6E] focus:bg-white transition resize-none"
                 placeholder="Describe your main reason for visiting the emergency department"
               />
             </div>
@@ -208,9 +198,16 @@ export default function PatientRegistration() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2 text-white font-semibold py-3.5 rounded-xl transition-all duration-200"
+              style={{
+                background: loading ? '#6B7280' : '#1C3D6E',
+                boxShadow: loading ? 'none' : '0 4px 14px rgba(28,61,110,0.30)',
+                cursor: loading ? 'not-allowed' : 'pointer',
+              }}
             >
-              {loading ? 'Registering...' : 'Register & Get Queue Number'}
+              {loading
+                ? <><Loader2 size={16} className="animate-spin" /> Registering…</>
+                : 'Register & Get Queue Number'}
             </button>
           </form>
         </div>

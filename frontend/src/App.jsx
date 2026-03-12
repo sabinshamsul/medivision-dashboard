@@ -72,11 +72,7 @@ function App() {
         
         <Route
           path="/patient"
-          element={
-            <ProtectedRoute allowedRoles={['patient']}>
-              <PatientRegistration />
-            </ProtectedRoute>
-          }
+          element={<Navigate to="/register" />}
         />
       </Routes>
     </Router>

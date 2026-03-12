@@ -283,7 +283,7 @@ export default function ClinicianDashboard() {
 
         {/* ── Navbar ── */}
         <header className="flex items-center justify-between px-6 py-3 shadow-md" style={{ backgroundColor: '#1C3D6E' }}>
-          <h1 className="text-white font-semibold text-base tracking-wide">Hospital Flow Dashboard</h1>
+          <h1 className="text-white font-semibold text-base tracking-wide">Smart Patient Flow Platform</h1>
           <div className="flex items-center gap-3">
             <button
               onClick={() => setDarkMode(prev => !prev)}

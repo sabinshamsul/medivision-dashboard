@@ -137,7 +137,8 @@ export default function PatientRegistration() {
                 max={today}
                 value={formData.dateOfBirth}
                 onChange={handleChange}
-                className="w-full max-w-full box-border px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-[#1C3D6E] focus:bg-white transition"
+                className="w-full max-w-full box-border appearance-none px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-[#1C3D6E] focus:bg-white transition"
+                style={{ WebkitAppearance: 'none', display: 'block', width: '100%', boxSizing: 'border-box' }}
               />
             </div>
 

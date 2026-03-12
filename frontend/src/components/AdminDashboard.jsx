@@ -388,7 +388,6 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('medivision-dark') === 'true');
   const [hourlyFlowDate, setHourlyFlowDate] = useState('today');
-  const [statusOverviewDate, setStatusOverviewDate] = useState('today');
 
   useEffect(() => {
     fetchData();
@@ -454,23 +453,14 @@ export default function AdminDashboard() {
 
   const TRIAGE_COLORS = { 1: '#ef4444', 2: '#eab308', 3: '#22c55e' };
 
-  // Active patients: not yet discharged AND no final disposition recorded
-  const activePatientsSet = patients.filter(p =>
-    p.status !== 'Discharged' &&
-    !['Discharge', 'Admit', 'Referral'].includes(p.treatment?.disposition)
-  );
-  const triageCounts = activePatientsSet.reduce((acc, p) => {
-    const cat = p.triageCategory;
-    if (cat) acc[cat] = (acc[cat] || 0) + 1;
-    return acc;
-  }, {});
-  const triageData = [1, 2, 3]
-    .filter(cat => triageCounts[cat])
-    .map(cat => ({
-      name: getTriageLabel(cat),
-      value: triageCounts[cat],
-      color: TRIAGE_COLORS[cat],
-    }));
+  const triageData = stats?.triageStats
+    ?.slice()
+    .sort((a, b) => a._id - b._id)
+    .map(item => ({
+      name: getTriageLabel(item._id),
+      value: item.count,
+      color: TRIAGE_COLORS[item._id] || '#9ca3af',
+    })) || [];
 
   // Compute hourly flow from patient list based on selected date filter
   const computeHourlyFlow = (filter) => {
@@ -516,49 +506,6 @@ export default function AdminDashboard() {
     week:      'Last 7 Days — arrivals & discharges by hour of day',
     all:       'All Time — arrivals & discharges by hour of day',
   }[hourlyFlowDate];
-
-  const computeStatusOverview = (filter) => {
-    const now = new Date();
-    let startDate, endDate;
-    if (filter === 'today') {
-      startDate = new Date(now); startDate.setHours(0, 0, 0, 0);
-      endDate   = new Date(now); endDate.setHours(23, 59, 59, 999);
-    } else if (filter === 'yesterday') {
-      startDate = new Date(now); startDate.setDate(startDate.getDate() - 1); startDate.setHours(0, 0, 0, 0);
-      endDate   = new Date(now); endDate.setDate(endDate.getDate() - 1);     endDate.setHours(23, 59, 59, 999);
-    } else if (filter === 'week') {
-      startDate = new Date(now); startDate.setDate(startDate.getDate() - 6); startDate.setHours(0, 0, 0, 0);
-      endDate   = new Date(now);
-    } else {
-      startDate = null; endDate = null;
-    }
-    const inRange = (d) => !startDate || (d >= startDate && d <= endDate);
-    const counts = { Registered: 0, 'Vitals Taken': 0, Triaged: 0, 'In Treatment': 0, Discharged: 0 };
-    patients.forEach(p => {
-      if (p.arrivalTime) {
-        const d = new Date(p.arrivalTime);
-        if (inRange(d)) {
-          const s = p.status || 'Registered';
-          if (counts[s] !== undefined) counts[s]++;
-        }
-      }
-    });
-    return [
-      { name: 'Registered',   count: counts['Registered'] },
-      { name: 'Vitals Taken', count: counts['Vitals Taken'] },
-      { name: 'Triaged',      count: counts['Triaged'] },
-      { name: 'In Treatment', count: counts['In Treatment'] },
-      { name: 'Discharged',   count: counts['Discharged'] },
-    ];
-  };
-
-  const statusOverviewData = computeStatusOverview(statusOverviewDate);
-  const statusOverviewLabel = {
-    today:     `Today — ${new Date().toLocaleDateString('en-MY', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })}`,
-    yesterday: (() => { const d = new Date(); d.setDate(d.getDate() - 1); return `Yesterday — ${d.toLocaleDateString('en-MY', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })}`; })(),
-    week:      'Last 7 Days',
-    all:       'All Time',
-  }[statusOverviewDate];
 
   const navItems = [
     { key: 'overview',   label: 'Overview',   icon: <LayoutDashboard size={20} /> },
@@ -704,7 +651,7 @@ export default function AdminDashboard() {
                     <div>
                       <p className="text-xs font-semibold text-red-600 uppercase tracking-wide mb-1">ED Congestion</p>
                       <p className="text-3xl font-bold text-red-600">{stats?.edCongestion ?? 0}</p>
-                      <p className="text-xs text-gray-400 mt-1">Awaiting disposition</p>
+                      <p className="text-xs text-gray-400 mt-1">Patients not discharged</p>
                     </div>
                     <AlertCircle className="text-red-300" size={34} />
                   </div>
@@ -727,30 +674,20 @@ export default function AdminDashboard() {
                   </ResponsiveContainer>
                 </div>
                 <div className="bg-white rounded-2xl shadow p-6">
-                  <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
-                    <div>
-                      <h2 className="text-lg font-semibold text-gray-800">Patient Status Overview</h2>
-                      <p className="text-xs text-gray-400 mt-0.5">{statusOverviewLabel}</p>
-                    </div>
-                    <select
-                      value={statusOverviewDate}
-                      onChange={e => setStatusOverviewDate(e.target.value)}
-                      className="text-xs border border-gray-200 rounded-xl px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 cursor-pointer shadow-sm"
-                    >
-                      <option value="today">Today</option>
-                      <option value="yesterday">Yesterday</option>
-                      <option value="week">Last 7 Days</option>
-                      <option value="all">All Time</option>
-                    </select>
-                  </div>
-                  <ResponsiveContainer width="100%" height={270}>
-                    <BarChart data={statusOverviewData}>
+                  <h2 className="text-lg font-semibold text-gray-800 mb-4">Patient Status Overview</h2>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={[
+                      { name: 'Registered',   count: stats?.registered   || 0 },
+                      { name: 'Triaged',      count: stats?.triaged      || 0 },
+                      { name: 'In Treatment', count: stats?.inTreatment  || 0 },
+                      { name: 'Discharged',   count: stats?.discharged   || 0 },
+                    ]}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                      <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                      <XAxis dataKey="name" />
+                      <YAxis />
                       <Tooltip />
                       <Legend />
-                      <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="count" fill="#3b82f6" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -833,7 +770,7 @@ export default function AdminDashboard() {
                     <div>
                       <p className="text-xs font-semibold text-red-600 uppercase tracking-wide mb-1">ED Congestion</p>
                       <p className="text-3xl font-bold text-red-600">{stats?.edCongestion ?? 0}</p>
-                      <p className="text-xs text-gray-400 mt-1">Awaiting disposition</p>
+                      <p className="text-xs text-gray-400 mt-1">Patients not discharged</p>
                     </div>
                     <AlertCircle className="text-red-300" size={34} />
                   </div>
@@ -856,30 +793,20 @@ export default function AdminDashboard() {
                   </ResponsiveContainer>
                 </div>
                 <div className="bg-white rounded-2xl shadow p-6">
-                  <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
-                    <div>
-                      <h2 className="text-lg font-semibold text-gray-800">Patient Status Overview</h2>
-                      <p className="text-xs text-gray-400 mt-0.5">{statusOverviewLabel}</p>
-                    </div>
-                    <select
-                      value={statusOverviewDate}
-                      onChange={e => setStatusOverviewDate(e.target.value)}
-                      className="text-xs border border-gray-200 rounded-xl px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 cursor-pointer shadow-sm"
-                    >
-                      <option value="today">Today</option>
-                      <option value="yesterday">Yesterday</option>
-                      <option value="week">Last 7 Days</option>
-                      <option value="all">All Time</option>
-                    </select>
-                  </div>
-                  <ResponsiveContainer width="100%" height={270}>
-                    <BarChart data={statusOverviewData}>
+                  <h2 className="text-lg font-semibold text-gray-800 mb-4">Patient Status Overview</h2>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={[
+                      { name: 'Registered',   count: stats?.registered   || 0 },
+                      { name: 'Triaged',      count: stats?.triaged      || 0 },
+                      { name: 'In Treatment', count: stats?.inTreatment  || 0 },
+                      { name: 'Discharged',   count: stats?.discharged   || 0 },
+                    ]}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                      <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                      <XAxis dataKey="name" />
+                      <YAxis />
                       <Tooltip />
                       <Legend />
-                      <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="count" fill="#3b82f6" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>

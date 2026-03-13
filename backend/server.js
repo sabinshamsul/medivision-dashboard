@@ -19,9 +19,11 @@ app.use(express.json());
 // Routes
 const patientsRouter = require('./routes/patients');
 const authRouter = require('./routes/auth');
+const aiRouter = require('./routes/ai');
 
 app.use('/api/patients', patientsRouter);
 app.use('/api/auth', authRouter);
+app.use('/api/ai', aiRouter);
 
 // Root route
 app.get('/', (req, res) => {
@@ -30,7 +32,8 @@ app.get('/', (req, res) => {
     version: '1.0.0',
     endpoints: {
       auth: '/api/auth',
-      patients: '/api/patients'
+      patients: '/api/patients',
+      ai: '/api/ai'
     }
   });
 });

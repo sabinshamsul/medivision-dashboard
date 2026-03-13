@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { submitVitals, confirmTriage } from '../services/api';
-import { Activity, CheckCircle, AlertTriangle, XCircle, X } from 'lucide-react';
+import { submitVitals, confirmTriage, predictAI } from '../services/api';
+import { Activity, CheckCircle, AlertTriangle, XCircle, X, Brain } from 'lucide-react';
 
 export default function VitalsFormModal({ patient, onClose, onVitalsSubmitted }) {
   const [vitals, setVitals] = useState({
@@ -21,6 +21,9 @@ export default function VitalsFormModal({ patient, onClose, onVitalsSubmitted })
   const [overrideReason, setOverrideReason] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [aiResult, setAiResult] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState('');
 
   const handleVitalChange = (e) => {
     const { name, value } = e.target;
@@ -45,6 +48,22 @@ export default function VitalsFormModal({ patient, onClose, onVitalsSubmitted })
       const response = await submitVitals(patient._id, vitalsData);
       setTriageResult(response.data.triageResult);
       setStep('recommendation');
+
+      // Fire AI prediction in background (non-blocking)
+      setAiLoading(true);
+      setAiError('');
+      try {
+        const aiResponse = await predictAI(patient._id, vitalsData);
+        if (aiResponse.data.aiPrediction) {
+          setAiResult(aiResponse.data);
+        } else {
+          setAiError(aiResponse.data.error || 'AI service unavailable');
+        }
+      } catch (aiErr) {
+        setAiError('AI prediction unavailable');
+      } finally {
+        setAiLoading(false);
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to submit vitals');
     } finally {
@@ -352,6 +371,88 @@ export default function VitalsFormModal({ patient, onClose, onVitalsSubmitted })
                   {triageResult.criticalFindings.map((f, i) => (
                     <p key={i} className="text-sm text-red-700">{f.reason}</p>
                   ))}
+                </div>
+              )}
+
+              {/* AI Model Prediction */}
+              {aiLoading && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+                  <div className="flex items-center justify-center gap-2 text-blue-700">
+                    <Activity className="animate-spin" size={18} />
+                    <span className="text-sm font-medium">Running AI model prediction...</span>
+                  </div>
+                </div>
+              )}
+
+              {aiResult && aiResult.aiPrediction && (
+                <div className="border border-gray-200 rounded-xl p-4 space-y-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Brain size={18} className="text-purple-600" />
+                    <h3 className="text-sm font-semibold text-gray-700">AI Model Prediction</h3>
+                  </div>
+
+                  {/* AI Category */}
+                  <div className={`border rounded-lg p-3 text-center ${getCategoryStyle(aiResult.aiPrediction.category)}`}>
+                    <p className="text-lg font-bold">{getCategoryLabel(aiResult.aiPrediction.category)}</p>
+                  </div>
+
+                  {/* Probability Bars */}
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Risk Probabilities</p>
+
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs font-medium text-gray-600 w-24">Critical</span>
+                      <div className="flex-1 bg-gray-100 rounded-full h-4 overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{ width: `${aiResult.aiPrediction.red_risk}%`, backgroundColor: '#EF4444' }}
+                        />
+                      </div>
+                      <span className="text-xs font-bold text-gray-700 w-12 text-right">
+                        {aiResult.aiPrediction.red_risk}%
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs font-medium text-gray-600 w-24">Semi-Critical</span>
+                      <div className="flex-1 bg-gray-100 rounded-full h-4 overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{ width: `${aiResult.aiPrediction.yellow_risk}%`, backgroundColor: '#F59E0B' }}
+                        />
+                      </div>
+                      <span className="text-xs font-bold text-gray-700 w-12 text-right">
+                        {aiResult.aiPrediction.yellow_risk}%
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs font-medium text-gray-600 w-24">Non-Critical</span>
+                      <div className="flex-1 bg-gray-100 rounded-full h-4 overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{ width: `${aiResult.aiPrediction.green_risk}%`, backgroundColor: '#22C55E' }}
+                        />
+                      </div>
+                      <span className="text-xs font-bold text-gray-700 w-12 text-right">
+                        {aiResult.aiPrediction.green_risk}%
+                      </span>
+                    </div>
+                  </div>
+
+                  {aiResult.mappedFeatures && (
+                    <p className="text-xs text-gray-400 mt-2">
+                      Model inputs: Age {aiResult.mappedFeatures.age},{' '}
+                      {aiResult.mappedFeatures.gender},{' '}
+                      Mental status: {aiResult.mappedFeatures.avpuLabel} (GCS {aiResult.mappedFeatures.gcs})
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {aiError && !aiLoading && (
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center">
+                  <p className="text-xs text-gray-500">{aiError}</p>
                 </div>
               )}
 

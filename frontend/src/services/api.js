@@ -52,4 +52,7 @@ export const confirmTriage = (patientId, data) => API.post(`/patients/${patientI
 // Treatment completion (clinician)
 export const completeTreatment = (patientId, data) => API.post(`/patients/${patientId}/treatment`, data);
 
+// AI Triage prediction
+export const predictAI = (patientId, vitals) => API.post('/ai/predict', { patientId, vitals });
+
 export default API;

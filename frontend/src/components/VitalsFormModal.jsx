@@ -76,12 +76,10 @@ export default function VitalsFormModal({ patient, onClose, onVitalsSubmitted })
     try {
       const storedUser = localStorage.getItem('user');
       const user = storedUser ? JSON.parse(storedUser) : {};
-      const isOverride = category !== triageResult.category;
 
       await confirmTriage(patient._id, {
         confirmedCategory: category,
-        nurseOverride: isOverride,
-        nurseOverrideReason: isOverride ? 'Clinician clinical judgement' : undefined,
+        nurseOverride: false,
         triagedBy: user.name || user.username || 'Unknown'
       });
       onVitalsSubmitted();
@@ -111,12 +109,14 @@ export default function VitalsFormModal({ patient, onClose, onVitalsSubmitted })
               Patient: {patient.name} — {patient.patientId}
             </p>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition"
-          >
-            <X size={20} className="text-gray-500" />
-          </button>
+          {step === 'vitals' && (
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 rounded-lg transition"
+            >
+              <X size={20} className="text-gray-500" />
+            </button>
+          )}
         </div>
 
         <div className="p-6">

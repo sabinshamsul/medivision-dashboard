@@ -212,7 +212,6 @@ router.post('/:id/vitals', async (req, res) => {
 
     patient.aiTriageCategory = triageResult.category;
     patient.aiTriageColor = triageResult.color;
-    patient.status = 'Vitals Taken';
 
     const updatedPatient = await patient.save();
 
@@ -233,8 +232,12 @@ router.post('/:id/triage-confirm', async (req, res) => {
       return res.status(404).json({ message: 'Patient not found' });
     }
 
-    if (patient.status !== 'Vitals Taken') {
+    if (patient.status !== 'Registered' && patient.status !== 'Vitals Taken') {
       return res.status(400).json({ message: 'Triage can only be confirmed for patients with vitals taken' });
+    }
+
+    if (!patient.vitalSigns || !patient.vitalSigns.heartRate) {
+      return res.status(400).json({ message: 'Vitals must be recorded before confirming triage' });
     }
 
     const colorMap = { 1: 'Red', 2: 'Yellow', 3: 'Green' };

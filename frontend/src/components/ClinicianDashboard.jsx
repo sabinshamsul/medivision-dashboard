@@ -97,9 +97,6 @@ function PatientCard({ patient, showActions, onTakeVitals, onStartTreatment, onC
         {patient.triageCategory && (
           <div className="mb-3">
             <p className="text-xs font-medium text-gray-700">{getTriageLabel(patient.triageCategory)}</p>
-            {patient.nurseOverride && (
-              <p className="text-xs text-orange-600 mt-0.5">Nurse override — {patient.nurseOverrideReason}</p>
-            )}
           </div>
         )}
 
@@ -133,7 +130,7 @@ function PatientCard({ patient, showActions, onTakeVitals, onStartTreatment, onC
                 Take Vitals
               </button>
             )}
-            {(patient.status === 'Triaged' || patient.status === 'Vitals Taken') && (
+            {patient.status === 'Triaged' && (
               <button
                 onClick={() => onStartTreatment(patient)}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl text-sm font-medium transition"
@@ -208,7 +205,7 @@ export default function ClinicianDashboard() {
   };
 
   const waitingPatients = patients.filter(p => p.status === 'Registered');
-  const triagedPatients = patients.filter(p => p.status === 'Triaged' || p.status === 'Vitals Taken');
+  const triagedPatients = patients.filter(p => p.status === 'Triaged');
   const inTreatmentPatients = patients.filter(p => p.status === 'In Treatment');
 
   // Overview: all non-discharged, sorted by chosen sort

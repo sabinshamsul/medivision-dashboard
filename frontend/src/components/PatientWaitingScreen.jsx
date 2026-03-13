@@ -293,14 +293,17 @@ export default function PatientWaitingScreen() {
           <div className="flex flex-col items-center gap-1">
             <img src={mediVisionLogo} alt="MediVision Logo" className="w-16 h-16 rounded-2xl object-cover shadow-lg" />
             <h1 className="text-xl font-bold text-white tracking-wide mt-1">Patient Visitation</h1>
-            <div className="flex items-center gap-2 text-white/80 text-sm mt-1">
-              <span className="relative flex h-2.5 w-2.5">
+            <div className="flex items-center gap-2 mt-2">
+              <span className="relative flex h-3 w-3">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
               </span>
-              <span>Live — updates automatically</span>
+              <span className="text-lg font-semibold text-white">Live — updates automatically</span>
             </div>
-            <p className="text-white/60 text-xs mt-0.5">Stay on for live updates. Please do not refresh or close.</p>
+            <div className="bg-yellow-500/90 rounded-lg px-4 py-2 mt-2 flex items-center gap-2">
+              <AlertCircle size={18} className="text-yellow-900 flex-shrink-0" />
+              <p className="text-sm font-semibold text-yellow-900">Stay on for live updates. Please do not refresh or close.</p>
+            </div>
             <div className="flex items-center gap-3 mt-3 bg-white/15 rounded-2xl px-6 py-3">
               <span className="text-base font-medium text-white/80">Queue Number</span>
               <span className="text-4xl font-extrabold text-white">{patient.queueNumber || '—'}</span>

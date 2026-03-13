@@ -301,9 +301,9 @@ export default function PatientWaitingScreen() {
               <span>Live — updates automatically</span>
             </div>
             <p className="text-white/60 text-xs mt-0.5">Stay on for live updates. Please do not refresh or close.</p>
-            <div className="flex items-center gap-2 mt-2">
-              <span className="text-sm text-white/70">Queue Number</span>
-              <span className="text-2xl font-bold text-white">{patient.queueNumber || '—'}</span>
+            <div className="flex items-center gap-3 mt-3 bg-white/15 rounded-2xl px-6 py-3">
+              <span className="text-base font-medium text-white/80">Queue Number</span>
+              <span className="text-4xl font-extrabold text-white">{patient.queueNumber || '—'}</span>
             </div>
           </div>
 

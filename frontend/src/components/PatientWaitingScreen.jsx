@@ -32,6 +32,14 @@ function getStatusIndex(status) {
   return idx === -1 ? 0 : idx;
 }
 
+function getEffectiveStatus(patient) {
+  // If vitals have been recorded but status is still Registered, treat as Vitals Taken for journey display
+  if (patient?.status === 'Registered' && patient?.vitalSigns?.heartRate != null) {
+    return 'Vitals Taken';
+  }
+  return patient?.status || 'Registered';
+}
+
 function getStepState(stepMinStatus, currentStatus) {
   // Discharged is terminal — its own step should show as completed, not current
   if (currentStatus === 'Discharged' && stepMinStatus === 'Discharged') return 'completed';
@@ -281,26 +289,26 @@ export default function PatientWaitingScreen() {
             </button>
           </div>
 
-          {/* Centre — Logo + title + live indicator */}
+          {/* Centre — Logo + title + live indicator + queue */}
           <div className="flex flex-col items-center gap-1">
             <img src={mediVisionLogo} alt="MediVision Logo" className="w-16 h-16 rounded-2xl object-cover shadow-lg" />
             <h1 className="text-xl font-bold text-white tracking-wide mt-1">Patient Visitation</h1>
-            <div className="flex items-center gap-2 text-white/80 text-sm mt-0.5">
+            <div className="flex items-center gap-2 text-white/80 text-sm mt-1">
               <span className="relative flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
               </span>
               <span>Live — updates automatically</span>
-              <span className="text-white/40 mx-1">·</span>
-              <span>Stay on for live updates</span>
+            </div>
+            <p className="text-white/60 text-xs mt-0.5">Stay on for live updates. Please do not refresh or close.</p>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="text-sm text-white/70">Queue Number</span>
+              <span className="text-2xl font-bold text-white">{patient.queueNumber || '—'}</span>
             </div>
           </div>
 
-          {/* Right — Queue Number */}
-          <div className="text-right w-32">
-            <p className="text-sm text-white/70">Queue Number</p>
-            <p className="text-2xl font-bold text-white">{patient.queueNumber || '—'}</p>
-          </div>
+          {/* Right — spacer for symmetry */}
+          <div className="w-32"></div>
         </div>
       </header>
 
@@ -477,7 +485,7 @@ export default function PatientWaitingScreen() {
 
                 <div className="space-y-8">
                   {JOURNEY_STEPS.map((step, index) => {
-                    const state = getStepState(step.minStatus, patient.status);
+                    const state = getStepState(step.minStatus, getEffectiveStatus(patient));
                     const { primaryTime, durationLabel } = getStepDisplayData(index, patient);
 
                     return (
@@ -549,7 +557,7 @@ export default function PatientWaitingScreen() {
                   <span className="font-medium text-gray-800">{patient.name}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">IC Number</span>
+                  <span className="text-gray-500">IC / Passport Number</span>
                   <span className="font-medium text-gray-800">{patient.icNumber}</span>
                 </div>
                 <div className="flex justify-between">

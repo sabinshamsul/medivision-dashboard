@@ -16,9 +16,6 @@ export default function VitalsFormModal({ patient, onClose, onVitalsSubmitted })
   });
   const [step, setStep] = useState('vitals'); // 'vitals' | 'recommendation'
   const [triageResult, setTriageResult] = useState(null);
-  const [showOverride, setShowOverride] = useState(false);
-  const [overrideCategory, setOverrideCategory] = useState('');
-  const [overrideReason, setOverrideReason] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [aiResult, setAiResult] = useState(null);
@@ -30,7 +27,7 @@ export default function VitalsFormModal({ patient, onClose, onVitalsSubmitted })
     setVitals({ ...vitals, [name]: value });
   };
 
-  // Step 1: Submit vitals and get AI recommendation
+  // Step 1: Submit vitals and get recommendations
   const handleSubmitVitals = async (e) => {
     e.preventDefault();
     setError('');
@@ -71,18 +68,20 @@ export default function VitalsFormModal({ patient, onClose, onVitalsSubmitted })
     }
   };
 
-  // Step 2: Confirm AI recommendation
-  const handleAgree = async () => {
+  // Step 2: Clinician assigns triage category
+  const handleConfirmCategory = async (category) => {
     setLoading(true);
     setError('');
 
     try {
       const storedUser = localStorage.getItem('user');
       const user = storedUser ? JSON.parse(storedUser) : {};
+      const isOverride = category !== triageResult.category;
 
       await confirmTriage(patient._id, {
-        confirmedCategory: triageResult.category,
-        nurseOverride: false,
+        confirmedCategory: category,
+        nurseOverride: isOverride,
+        nurseOverrideReason: isOverride ? 'Clinician clinical judgement' : undefined,
         triagedBy: user.name || user.username || 'Unknown'
       });
       onVitalsSubmitted();
@@ -91,52 +90,6 @@ export default function VitalsFormModal({ patient, onClose, onVitalsSubmitted })
     } finally {
       setLoading(false);
     }
-  };
-
-  // Step 2: Override AI recommendation
-  const handleOverride = async () => {
-    if (!overrideCategory || !overrideReason.trim()) {
-      setError('Please select a category and provide a reason for the override.');
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-
-    try {
-      const storedUser = localStorage.getItem('user');
-      const user = storedUser ? JSON.parse(storedUser) : {};
-
-      await confirmTriage(patient._id, {
-        confirmedCategory: Number(overrideCategory),
-        nurseOverride: true,
-        nurseOverrideReason: overrideReason,
-        triagedBy: user.name || user.username || 'Unknown'
-      });
-      onVitalsSubmitted();
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to override triage');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getCategoryStyle = (category) => {
-    const styles = {
-      1: 'bg-red-100 border-red-400 text-red-800',
-      2: 'bg-yellow-100 border-yellow-400 text-yellow-800',
-      3: 'bg-green-100 border-green-400 text-green-800'
-    };
-    return styles[category] || '';
-  };
-
-  const getCategoryLabel = (category) => {
-    const labels = {
-      1: 'Category 1 — Critical (Red Zone)',
-      2: 'Category 2 — Semi-Critical (Yellow Zone)',
-      3: 'Category 3 — Non-Critical (Green Zone)'
-    };
-    return labels[category] || 'Unknown';
   };
 
   const getFindingIcon = (category) => {
@@ -152,7 +105,7 @@ export default function VitalsFormModal({ patient, onClose, onVitalsSubmitted })
         <div className="flex items-center justify-between p-6 border-b">
           <div>
             <h2 className="text-xl font-bold text-gray-800">
-              {step === 'vitals' ? 'Record Vital Signs' : 'AI Triage Recommendation'}
+              {step === 'vitals' ? 'Record Vital Signs' : 'Triage Assessment'}
             </h2>
             <p className="text-sm text-gray-500 mt-1">
               Patient: {patient.name} — {patient.patientId}
@@ -338,18 +291,16 @@ export default function VitalsFormModal({ patient, onClose, onVitalsSubmitted })
             </form>
           )}
 
-          {/* STEP 2: AI Recommendation */}
+          {/* STEP 2: Triage Assessment */}
           {step === 'recommendation' && triageResult && (
             <div className="space-y-4">
-              {/* Recommendation card */}
-              <div className={`border-2 rounded-xl p-6 text-center ${getCategoryStyle(triageResult.category)}`}>
-                <p className="text-sm font-medium mb-2">AI Triage Recommendation</p>
-                <p className="text-2xl font-bold">{getCategoryLabel(triageResult.category)}</p>
-              </div>
 
-              {/* Findings list */}
+              {/* Vital Signs Analysis */}
               <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">Assessment Findings</h3>
+                <div className="flex items-center gap-2 mb-3">
+                  <Activity size={16} className="text-blue-600" />
+                  <h3 className="text-sm font-semibold text-gray-700">Vital Signs Analysis</h3>
+                </div>
                 <div className="space-y-2">
                   {triageResult.findings.map((finding, index) => (
                     <div key={index} className="flex items-start gap-2 text-sm">
@@ -374,12 +325,12 @@ export default function VitalsFormModal({ patient, onClose, onVitalsSubmitted })
                 </div>
               )}
 
-              {/* AI Model Prediction */}
+              {/* AI Risk Assessment */}
               {aiLoading && (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
                   <div className="flex items-center justify-center gap-2 text-blue-700">
                     <Activity className="animate-spin" size={18} />
-                    <span className="text-sm font-medium">Running AI model prediction...</span>
+                    <span className="text-sm font-medium">Running AI risk assessment...</span>
                   </div>
                 </div>
               )}
@@ -387,19 +338,12 @@ export default function VitalsFormModal({ patient, onClose, onVitalsSubmitted })
               {aiResult && aiResult.aiPrediction && (
                 <div className="border border-gray-200 rounded-xl p-4 space-y-3">
                   <div className="flex items-center gap-2 mb-2">
-                    <Brain size={18} className="text-purple-600" />
-                    <h3 className="text-sm font-semibold text-gray-700">AI Model Prediction</h3>
-                  </div>
-
-                  {/* AI Category */}
-                  <div className={`border rounded-lg p-3 text-center ${getCategoryStyle(aiResult.aiPrediction.category)}`}>
-                    <p className="text-lg font-bold">{getCategoryLabel(aiResult.aiPrediction.category)}</p>
+                    <Brain size={16} className="text-purple-600" />
+                    <h3 className="text-sm font-semibold text-gray-700">AI Risk Assessment</h3>
                   </div>
 
                   {/* Probability Bars */}
                   <div className="space-y-2">
-                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Risk Probabilities</p>
-
                     <div className="flex items-center gap-3">
                       <span className="text-xs font-medium text-gray-600 w-24">Critical</span>
                       <div className="flex-1 bg-gray-100 rounded-full h-4 overflow-hidden">
@@ -418,7 +362,7 @@ export default function VitalsFormModal({ patient, onClose, onVitalsSubmitted })
                       <div className="flex-1 bg-gray-100 rounded-full h-4 overflow-hidden">
                         <div
                           className="h-full rounded-full transition-all duration-500"
-                          style={{ width: `${aiResult.aiPrediction.yellow_risk}%`, backgroundColor: '#F59E0B' }}
+                          style={{ width: `${aiResult.aiPrediction.yellow_risk}%`, backgroundColor: '#EAB308' }}
                         />
                       </div>
                       <span className="text-xs font-bold text-gray-700 w-12 text-right">
@@ -439,14 +383,6 @@ export default function VitalsFormModal({ patient, onClose, onVitalsSubmitted })
                       </span>
                     </div>
                   </div>
-
-                  {aiResult.mappedFeatures && (
-                    <p className="text-xs text-gray-400 mt-2">
-                      Model inputs: Age {aiResult.mappedFeatures.age},{' '}
-                      {aiResult.mappedFeatures.gender},{' '}
-                      Mental status: {aiResult.mappedFeatures.avpuLabel} (GCS {aiResult.mappedFeatures.gcs})
-                    </p>
-                  )}
                 </div>
               )}
 
@@ -456,73 +392,34 @@ export default function VitalsFormModal({ patient, onClose, onVitalsSubmitted })
                 </div>
               )}
 
-              {/* Action buttons */}
-              {!showOverride ? (
+              {/* Clinician Decision */}
+              <div className="border-t pt-4">
+                <p className="text-sm font-semibold text-gray-700 mb-3">Assign Triage Category</p>
                 <div className="flex gap-3">
                   <button
-                    onClick={handleAgree}
+                    onClick={() => handleConfirmCategory(1)}
                     disabled={loading}
-                    className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50"
+                    className="flex-1 bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-600 transition disabled:opacity-50"
                   >
-                    {loading ? 'Confirming...' : 'Agree with Recommendation'}
+                    {loading ? '...' : 'Cat 1 - Critical'}
                   </button>
                   <button
-                    onClick={() => setShowOverride(true)}
-                    className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition"
+                    onClick={() => handleConfirmCategory(2)}
+                    disabled={loading}
+                    className="flex-1 bg-yellow-400 text-yellow-900 py-3 rounded-lg font-semibold hover:bg-yellow-500 transition disabled:opacity-50"
                   >
-                    Override
+                    {loading ? '...' : 'Cat 2 - Semi-Critical'}
+                  </button>
+                  <button
+                    onClick={() => handleConfirmCategory(3)}
+                    disabled={loading}
+                    className="flex-1 bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition disabled:opacity-50"
+                  >
+                    {loading ? '...' : 'Cat 3 - Non-Critical'}
                   </button>
                 </div>
-              ) : (
-                <div className="border border-gray-200 rounded-lg p-4 space-y-3">
-                  <h3 className="font-semibold text-gray-800">Override AI Recommendation</h3>
+              </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Select Category *</label>
-                    <select
-                      value={overrideCategory}
-                      onChange={(e) => setOverrideCategory(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Select...</option>
-                      <option value="1">Category 1 — Critical (Red)</option>
-                      <option value="2">Category 2 — Semi-Critical (Yellow)</option>
-                      <option value="3">Category 3 — Non-Critical (Green)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Reason for Override *</label>
-                    <textarea
-                      value={overrideReason}
-                      onChange={(e) => setOverrideReason(e.target.value)}
-                      rows="2"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                      placeholder="Explain your clinical reasoning..."
-                    />
-                  </div>
-
-                  <div className="flex gap-3">
-                    <button
-                      onClick={handleOverride}
-                      disabled={loading}
-                      className="flex-1 bg-orange-600 text-white py-2 rounded-lg font-semibold hover:bg-orange-700 transition disabled:opacity-50"
-                    >
-                      {loading ? 'Confirming...' : 'Confirm Override'}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowOverride(false);
-                        setOverrideCategory('');
-                        setOverrideReason('');
-                      }}
-                      className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-300 transition"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           )}
         </div>

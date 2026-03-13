@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-import pickle
+import xgboost as xgb
 import numpy as np
 
 app = FastAPI(title="MediVision AI Triage Service")
@@ -13,23 +13,37 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load model and feature ordering at startup
-with open("ai_triage_model_XGBOOST.pkl", "rb") as f:
-    model = pickle.load(f)
+# Load XGBoost model from JSON (safer than pickle, no arbitrary code execution)
+model = xgb.XGBClassifier()
+model.load_model("ai_triage_xgboost.json")
 
-with open("model_features.pkl", "rb") as f:
-    feature_names = pickle.load(f)
+# Feature name mapping: clean API names → model's internal feature names
+FEATURE_MAP = {
+    "age": "age",
+    "gender": "gender",
+    "spo2": "O2Saturation",
+    "resp_rate": "RespiratoryRate",
+    "heart_rate": "PulseRate",
+    "systolic_bp": "BlooddpressurSystol",
+    "diastolic_bp": "BlooddpressurDiastol",
+    "pain_score": "PainGrade",
+    "temperature": "Temperature",
+}
+
+# Feature order as expected by the model
+MODEL_FEATURE_ORDER = list(model.get_booster().feature_names)
 
 
 class PredictRequest(BaseModel):
     age: int = Field(..., ge=0, le=150)
     gender: int = Field(..., ge=0, le=1)
     systolic_bp: float = Field(..., ge=0, le=300)
+    diastolic_bp: float = Field(..., ge=0, le=200)
     heart_rate: float = Field(..., ge=0, le=300)
     resp_rate: float = Field(..., ge=0, le=100)
     spo2: float = Field(..., ge=0, le=100)
     pain_score: float = Field(..., ge=0, le=10)
-    mental_status: int = Field(..., ge=0, le=3)
+    temperature: float = Field(..., ge=25, le=45)
 
 
 class PredictResponse(BaseModel):
@@ -41,28 +55,33 @@ class PredictResponse(BaseModel):
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "model_features": feature_names}
+    return {"status": "ok", "model_features": MODEL_FEATURE_ORDER}
 
 
 @app.post("/predict", response_model=PredictResponse)
 def predict(req: PredictRequest):
     try:
-        # Build feature array in the order specified by model_features.pkl
-        feature_values = []
+        # Map API field names to model feature names
         req_dict = req.model_dump()
-        for feat in feature_names:
-            feature_values.append(req_dict[feat])
+        reverse_map = {v: k for k, v in FEATURE_MAP.items()}
+
+        feature_values = []
+        for model_feat in MODEL_FEATURE_ORDER:
+            api_name = reverse_map[model_feat]
+            feature_values.append(req_dict[api_name])
 
         features = np.array([feature_values])
 
-        category = int(model.predict(features)[0])
-        probabilities = model.predict_proba(features)[0]
+        # Model classes are [0, 1, 2] → map to categories [1, 2, 3]
+        raw_category = int(model.predict(features)[0])
+        category = raw_category + 1  # 0→1, 1→2, 2→3
 
-        # Map model classes to risk percentages
+        probabilities = model.predict_proba(features)[0]
         classes = list(model.classes_)
-        red_risk = float(probabilities[classes.index(1)]) * 100 if 1 in classes else 0.0
-        yellow_risk = float(probabilities[classes.index(2)]) * 100 if 2 in classes else 0.0
-        green_risk = float(probabilities[classes.index(3)]) * 100 if 3 in classes else 0.0
+
+        red_risk = float(probabilities[classes.index(0)]) * 100 if 0 in classes else 0.0
+        yellow_risk = float(probabilities[classes.index(1)]) * 100 if 1 in classes else 0.0
+        green_risk = float(probabilities[classes.index(2)]) * 100 if 2 in classes else 0.0
 
         return PredictResponse(
             category=category,

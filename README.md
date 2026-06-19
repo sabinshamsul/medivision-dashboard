@@ -13,9 +13,6 @@
 [![Live Demo](https://img.shields.io/badge/Live-Demo-success)](https://medivision-dashboard.vercel.app)
 [![Video Walkthrough](https://img.shields.io/badge/YouTube-Walkthrough-red)](https://youtu.be/a-wKaxb9S9o)
 
-🔗 **Live:** [medivision-dashboard.vercel.app](https://medivision-dashboard.vercel.app)
-🎥 **Walkthrough:** [youtu.be/a-wKaxb9S9o](https://youtu.be/a-wKaxb9S9o)
-
 </div>
 
 ---

@@ -21,6 +21,20 @@
 
 [![Watch the walkthrough](https://img.youtube.com/vi/a-wKaxb9S9o/maxresdefault.jpg)](https://youtu.be/a-wKaxb9S9o)
 
+## 📋 Project Overview
+
+<p align="center">
+  <a href="screenshots/project-overview.png">
+    <img src="screenshots/project-overview.png" alt="MediVision project overview" width="900"/>
+  </a>
+
+This poster summarises the problem MediVision solves and the objectives behind it:
+1) Cross-department real-time patient tracking
+2) AI-driven triage to reduce classification errors
+3) A unified dashboard for critical metrics like bed availability.
+
+</p>
+
 ## 📸 Screenshots
 
 | Dashboard | AI Triage |

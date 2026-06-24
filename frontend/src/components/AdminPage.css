@@ -1,0 +1,351 @@
+/* ===== Base Layout ===== */
+.admin-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #0b1929;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
+  color: #fff;
+}
+
+/* ===== Navbar ===== */
+.admin-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #2D5EA4;
+  padding: 6px 20px;
+  color: #fff;
+  height: 60px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Square Logo Block in Navbar */
+.navbar-logo-box {
+  width: 48px;
+  height: 48px;
+  background: #fff;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.navbar-logo-img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+}
+
+/* Pill Buttons (Return Back, Home, Log Out) */
+.navbar-pill-btn {
+  background: transparent;
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  color: #fff;
+  padding: 7px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.navbar-pill-btn:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+.navbar-pill-btn .btn-arrow {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Active pill (Home) - same style as other pills */
+
+/* Logout pill */
+.navbar-pill-btn.logout {
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+.navbar-pill-btn.logout:hover {
+  background-color: rgba(220, 53, 69, 0.7);
+  border-color: rgba(220, 53, 69, 0.7);
+}
+
+/* Vertical Divider */
+.navbar-divider {
+  width: 1.5px;
+  height: 28px;
+  background-color: rgba(255, 255, 255, 0.35);
+  margin: 0 2px;
+  flex-shrink: 0;
+}
+
+/* Circle Buttons (dark mode, notification) */
+.navbar-circle-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.navbar-circle-btn:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+/* Dashboard title text */
+.navbar-dashboard-title {
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0.85;
+  margin-left: 4px;
+  white-space: nowrap;
+}
+
+/* ===== Content Area (with sidebar) ===== */
+.admin-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ===== Sidebar (empty blue strip) ===== */
+.admin-sidebar {
+  width: 80px;
+  background-color: #2D5EA4;
+  flex-shrink: 0;
+}
+
+/* ===== Content Area ===== */
+.admin-content {
+  flex: 1;
+  padding: 40px 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+  background-color: #0b1929;
+  transition: background-color 0.3s;
+}
+
+.admin-content.light {
+  background-color: #e8ecf1;
+}
+
+.welcome-heading {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #e0e6f0;
+  margin: 0 0 32px;
+  text-align: center;
+}
+
+.admin-content.light .welcome-heading {
+  color: #222;
+}
+
+.text-blue {
+  color: #2D5EA4;
+}
+
+.text-red {
+  color: #c0392b;
+}
+
+/* White card behind logo */
+.welcome-logo-card {
+  margin-bottom: 40px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+.welcome-logo {
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+  display: block;
+}
+
+/* ===== News Cards ===== */
+.news-cards {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.news-card {
+  background: #162a45;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+.news-card.light {
+  background: #d6ecf7;
+}
+
+.news-card-img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+}
+
+.news-card-body {
+  padding: 16px 20px 8px;
+}
+
+.news-card-text {
+  font-size: 13px;
+  color: #c8d8e8;
+  line-height: 1.6;
+  margin: 0 0 14px;
+  font-weight: 600;
+}
+
+.news-card.light .news-card-text {
+  color: #222;
+}
+
+.news-card-action {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 12px;
+}
+
+.read-more-btn {
+  background: transparent;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  color: #7ab3f0;
+  padding: 5px 22px;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.news-card.light .read-more-btn {
+  border-color: #2D5EA4;
+  color: #2D5EA4;
+}
+
+.read-more-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* ===== Feedback Button (right edge) ===== */
+.admin-feedback-btn {
+  position: fixed;
+  right: -26px;
+  top: 50%;
+  transform: translateY(-50%) rotate(-90deg);
+  transform-origin: right center;
+  background-color: #c0392b;
+  color: #fff;
+  border: none;
+  padding: 8px 20px;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 6px 6px 0 0;
+  z-index: 100;
+  letter-spacing: 0.5px;
+}
+
+.admin-feedback-btn:hover {
+  background-color: #e74c3c;
+}
+
+/* ===== Help Button (bottom-right) ===== */
+.admin-help {
+  position: fixed;
+  bottom: 20px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  z-index: 100;
+}
+
+.admin-help-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #2D5EA4;
+  color: #fff;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s, background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-help-btn:hover {
+  transform: scale(1.1);
+  background-color: #3a73bf;
+}
+
+.help-label {
+  font-size: 11px;
+  color: #8899aa;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .admin-navbar {
+    padding: 6px 12px;
+    gap: 6px;
+  }
+
+  .navbar-dashboard-title {
+    display: none;
+  }
+
+  .admin-content {
+    padding: 20px 16px;
+  }
+}

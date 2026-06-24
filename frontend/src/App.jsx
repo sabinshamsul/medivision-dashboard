@@ -1,8 +1,14 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './components/Login';
+import RoleSelection from './components/RoleSelection';
+import SplashPage from './components/SplashPage';
+import LoginAsAdmin from './components/LoginAsAdmin';
+import LoginAsStaff from './components/LoginAsStaff';
+import LoginAsPatient from './components/LoginAsPatient';
 import PatientRegistration from './components/PatientRegistration';
 import PatientWaitingScreen from './components/PatientWaitingScreen';
 import AdminDashboard from './components/AdminDashboard';
+import AdminPage from './components/AdminPage';
 import ClinicianDashboard from './components/ClinicianDashboard';
 import './index.css';
 
@@ -40,7 +46,12 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<SplashPage />} />
+        <Route path="/role-selection" element={<RoleSelection />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/login-admin" element={<LoginAsAdmin />} />
+        <Route path="/login-staff" element={<LoginAsStaff />} />
+        <Route path="/login-patient" element={<LoginAsPatient />} />
         
         <Route
           path="/register"
@@ -51,6 +62,8 @@ function App() {
           path="/waiting/:id"
           element={<PatientWaitingScreen />}
         />
+
+        <Route path="/admin-page" element={<AdminPage />} />
         
         <Route
           path="/admin"

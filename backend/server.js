@@ -47,13 +47,8 @@ const connectWithRetry = (retries = 5, delayMs = 5000) => {
     process.exit(1);
   }
 
-  const connectOptions = {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  };
-
   const attemptConnection = (remainingRetries) => {
-    mongoose.connect(mongoUri, connectOptions)
+    mongoose.connect(mongoUri)
       .then(() => {
         console.log('✅ MongoDB connected successfully');
 
